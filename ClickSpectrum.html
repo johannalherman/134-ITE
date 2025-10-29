@@ -94,6 +94,18 @@ function drawSpectrum(data){
 
 function render(){ clearCanvas(); drawAxes(); drawSpectrum(data); }
 
+function drawIndicatorLine(lambda){
+  const x = transformX(lambda);
+  ctx.strokeStyle = '#cc9900';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(x, margin.t);
+  ctx.lineTo(x, canvas.height - margin.b);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
 canvas.addEventListener('click', ev=>{
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
@@ -108,6 +120,7 @@ canvas.addEventListener('click', ev=>{
   render();
   const x=transformX(selected.lambda), y=transformY(selected.absorbance);
   ctx.fillStyle='#cc9900'; ctx.beginPath(); ctx.arc(x,y,8,0,Math.PI*2); ctx.fill();
+  drawIndicatorLine(selected.lambda);
 });
 
 window.getSelectedWavelength=()=>selected.lambda;
