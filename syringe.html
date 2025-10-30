@@ -61,6 +61,7 @@ body {
   height: 395px;
   pointer-events: none; /* allows clicks to go through transparent image */
 }
+
 </style>
 </head>
 <body>
@@ -68,27 +69,30 @@ body {
 <div class="container" id="cylinder">
   <div class="solution" id="solution"></div>
   <div class="reading" id="reading">Level: 0.00</div>
-    <img
-    class="overlay" alt="overlay"
-    src="https://github.com/johannalherman/133-CB/blob/main/Grad%20Cyld%20on%20Balnce%20w:%20tare.png?raw=true"
-  />
 </div>
+  <img
+    class="overlay"
+    alt="overlay"
+    src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
+  />
+
 
 <script>
-  const cylinder = document.getElementById('cylinder');
-  const solution = document.getElementById('solution');
-  const reading = document.getElementById('reading');
+const cylinder = document.getElementById("cylinder");
+const solution = document.getElementById("solution");
+const reading = document.getElementById("reading");
 
-  // Click to fill simulation
-  cylinder.addEventListener('click', (e) => {
-    const rect = cylinder.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    const height = rect.height;
-    const fraction = Math.max(0, Math.min(1, 1 - y / height));
-    const percent = (fraction * 100).toFixed(1);
-    solution.style.height = `${percent}%`;
-    reading.textContent = `Level: ${fraction.toFixed(2)}`;
-  });
+// Click to fill simulation
+cylinder.addEventListener("click", (e) => {
+  const rect = cylinder.getBoundingClientRect();
+  const y = e.clientY - rect.top;
+  const height = rect.height;
+  const fraction = Math.max(0, Math.min(1, 1 - y / height));
+  const percent = (fraction * 100).toFixed(1);
+  solution.style.height = `${percent}%`;
+  reading.textContent = `Level: ${fraction.toFixed(2)}`;
+});
+
 </script>
 
 </body>
