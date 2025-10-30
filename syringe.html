@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Syringe Fill Simulation</title>
+<style>
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f3f3f3;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  position: relative;
+  width: 90px;
+  height: 350px;
+  overflow: hidden;
+}
+
+.solution {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 0%;
+  background: linear-gradient(to top, #4db6ff, #81d4fa);
+  opacity: 0.5;
+  transition: height 0.4s ease;
+  pointer-events: none; /* allow clicks to pass through */
+}
+
+.solution::after {
+  content: "";
+  position: absolute;
+  top: 0px;
+  right: 50%;
+  transform: translateX(50%);
+  width: 100%;
+  height: 10px;
+  background: #def1fa;
+  border-radius: 0% 0% 50% 50%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.reading {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  color: #222;
+  pointer-events: none;
+}
+
+.overlay {
+  position: absolute;
+  top: 79px;
+  height: 395px;
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+</style>
+</head>
+<body>
+
+<div class="container" id="cylinder">
+  <div class="solution" id="solution"></div>
+  <div class="reading" id="reading">Level: 0.00</div>
+    <img
+    class="overlay" alt="overlay"
+    src="https://github.com/johannalherman/133-CB/blob/main/Grad%20Cyld%20on%20Balnce%20w:%20tare.png?raw=true"
+  />
+</div>
+
+<script>
+  const cylinder = document.getElementById('cylinder');
+  const solution = document.getElementById('solution');
+  const reading = document.getElementById('reading');
+
+  // Click to fill simulation
+  cylinder.addEventListener('click', (e) => {
+    const rect = cylinder.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const height = rect.height;
+    const fraction = Math.max(0, Math.min(1, 1 - y / height));
+    const percent = (fraction * 100).toFixed(1);
+    solution.style.height = `${percent}%`;
+    reading.textContent = `Level: ${fraction.toFixed(2)}`;
+  });
+</script>
+
+</body>
+</html>
