@@ -51,7 +51,7 @@
   transform: translateX(-50%);
   bottom: 37px;
   width: 80%;
-  height: 10%;
+  height: 89%;
   background: linear-gradient(to top, #4db6ff, #81d4fa);
   opacity: 0.5;
   transition: height 0.4s ease;
@@ -100,7 +100,7 @@ cylinder.addEventListener("click", (e) => {
   const height = rect.height;
   const fraction = Math.max(0, Math.min(1, 0.9075 - y / height));
   const percent = (fraction * 100);
-  solution.style.height = `${percent+1.25}%`;
+  // solution.style.height = `${percent+1.25}%`;
   overlay2.style.bottom = `${percent+9.5}%`;
   reading.textContent = `Level: ${(fraction*1.2).toFixed(2)}`;
 });
