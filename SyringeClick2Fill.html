@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Syringe Fill Simulation</title>
 <style>
-  body {
+body {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -12,44 +12,50 @@
   background: #f3f3f3;
   font-family: Arial, sans-serif;
 }
+.row {
+  display: flex;
+}
+.column {
+  width: 200px;
+  padding: 0px 20px;
+}
 
 #glassware-container {
-  margin: 20px;
+  width: 600px;
   position: relative;
   display: inline-block;
 }
-
-.overlay-1 {
+.syringe {
   position: relative;
-  height: 395px;
+  height: 296.25px; /* 395px; */
   pointer-events: none; /* allows clicks to go through transparent image */
 }
-.overlay-2 {
+.plunger {
   position: absolute;
   z-index: -10;
   left: 50%;
-  bottom: 36px;
+  bottom: 27px; /* 36px; */
   width: 120%;
   transform: translateX(-50%);
   transition: bottom 0.4s ease;
-  height: 395px;
+  height: 296.25px; /* 395px; */
   pointer-events: none; /* allows clicks to go through transparent image */
 }
-
 .container {
   position: relative;
-  width: 120px;
-  height: 400px;
-  /*  overflow: hidden;  */
-  /* border: 2px solid #666;  */
+  width: 90px; /* 120px; */
+  height: 300px; /* 400px; */
+  left: 50%;
+  transform: translateX(-50%);
+  /* overflow: hidden; */
+  /* border: 2px solid #666; */
 }
-
 .solution {
   position: absolute;
   z-index: -15;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 37px;
+  bottom: 27.27px; /* 37px; */
   width: 80%;
   height: 89%;
   background: linear-gradient(to top, #4db6ff, #81d4fa);
@@ -57,53 +63,172 @@
   transition: height 0.4s ease;
   pointer-events: none; /* allow clicks to pass through */
 }
-
 .reading {
   position: absolute;
-  top: 400px;
-  font-size: 18px;
+  top: 300px;
+  left: 50%;
+  width: 100px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  text-align: center;
   color: #222;
   pointer-events: none;
 }
-
+.beaker {
+  position: absolute;
+  z-index: 0;
+  width: 180px;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 190px;
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+.beaker_solution {
+  position: absolute;
+  z-index: -1;
+  width: 160px;
+  height: 120px;
+  border-radius: 0px 0px 30px 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 272px;
+  background: linear-gradient(to top, #4db6ff, #81d4fa);
+  opacity: 0.5;
+  transition: height 0.4s ease;
+  pointer-events: none; /* allow clicks to pass through */
+}
 
 </style>
 </head>
 <body>
   <div class="glassware-container">
-  <div class="container" id="cylinder">
-    <div class="solution" id="solution"></div>
-    <div class="reading" id="reading">Level: 0.00</div>
-    <img
-      class="overlay-1"
-      id="overlay1"
-      src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
-    />
-    <img
-      class="overlay-2"
-      id="overlay2"
-      src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
-    />
+  <div class="row">
+    <div class="column">
+      <div class="container" id="cylinder1">
+        <div class="solution" id="solution1"></div>
+        <div class="reading" id="reading1">Level: 0.00</div>
+        <img
+          class="syringe"
+          id="syringe1"
+          src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
+        />
+        <img
+          class="plunger"
+          id="plunger1"
+          src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
+        />
+        <img
+          class="beaker"
+          id="beaker1"
+          src="https://github.com/johannalherman/134-ITE/blob/main/Beaker.png?raw=true"
+        />
+        <div class="beaker_solution" id="beaker_solution1"></div>
+      </div>
+    </div>
+    <div class="column">
+      <div class="container" id="cylinder2">
+        <div class="solution" id="solution2"></div>
+        <div class="reading" id="reading2">Level: 0.00</div>
+        <img
+          class="syringe"
+          id="syringe2"
+          src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
+        />
+        <img
+          class="plunger"
+          id="plunger2"
+          src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
+        />
+        <img
+          class="beaker"
+          id="beaker2"
+          src="https://github.com/johannalherman/134-ITE/blob/main/Beaker.png?raw=true"
+        />
+        <div class="beaker_solution" id="beaker_solution2"></div>
+      </div>
+    </div>
+    <div class="column">
+      <div class="container" id="cylinder3">
+        <div class="solution" id="solution3"></div>
+        <div class="reading" id="reading3">Level: 0.00</div>
+        <img
+          class="syringe"
+          id="syringe3"
+          src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
+        />
+        <img
+          class="plunger"
+          id="plunger3"
+          src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
+        />
+        <img
+          class="beaker"
+          id="beaker3"
+          src="https://github.com/johannalherman/134-ITE/blob/main/Beaker.png?raw=true"
+        />
+        <div class="beaker_solution" id="beaker_solution3"></div>
+      </div>
+    </div>
   </div>
 </div>
 
+</div>
+
 <script>
-const cylinder = document.getElementById("cylinder");
-const solution = document.getElementById("solution");
-const reading = document.getElementById("reading");
-const overlay2 = document.getElementById("overlay2");
+  // Syringe 1
+const cylinder1 = document.getElementById("cylinder1");
+const solution1 = document.getElementById("solution1");
+const reading1 = document.getElementById("reading1");
+const plunger1 = document.getElementById("plunger1");
 
 // Click to fill simulation
-cylinder.addEventListener("click", (e) => {
-  const rect = cylinder.getBoundingClientRect();
+cylinder1.addEventListener("click", (e) => {
+  const rect = cylinder1.getBoundingClientRect();
   const y = e.clientY - rect.top;
   const height = rect.height;
-  const fraction = Math.max(0, Math.min(1, 0.9075 - y / height));
+  const fraction = Math.max(0, Math.min(1, 0.91 - y / height));
   const percent = (fraction * 100);
-  // solution.style.height = `${percent+1.25}%`;
-  overlay2.style.bottom = `${percent+9.5}%`;
-  reading.textContent = `Level: ${(fraction*1.2).toFixed(2)}`;
+  //solution1.style.height = `${percent+1.25}%`;
+  plunger1.style.bottom = `${percent+9}%`;
+  reading1.textContent = `Level: ${(fraction*1.2).toFixed(2)}`;
 });
+
+// Syringe 2
+const cylinder2 = document.getElementById("cylinder2");
+const solution2 = document.getElementById("solution2");
+const reading2 = document.getElementById("reading2");
+const plunger2 = document.getElementById("plunger2");
+
+// Click to fill simulation
+cylinder2.addEventListener("click", (e) => {
+  const rect = cylinder2.getBoundingClientRect();
+  const y = e.clientY - rect.top;
+  const height = rect.height;
+  const fraction = Math.max(0, Math.min(1, 0.91 - y / height));
+  const percent = (fraction * 100);
+  //solution2.style.height = `${percent+1.25}%`;
+  plunger2.style.bottom = `${percent+9}%`;
+  reading2.textContent = `Level: ${(fraction*1.2).toFixed(2)}`;
+});
+
+// Syringe 3
+const cylinder3 = document.getElementById("cylinder3");
+const solution3 = document.getElementById("solution3");
+const reading3 = document.getElementById("reading3");
+const plunger3 = document.getElementById("plunger3");
+
+// Click to fill simulation
+cylinder3.addEventListener("click", (e) => {
+  const rect = cylinder3.getBoundingClientRect();
+  const y = e.clientY - rect.top;
+  const height = rect.height;
+  const fraction = Math.max(0, Math.min(1, 0.91 - y / height));
+  const percent = (fraction * 100);
+  //solution3.style.height = `${percent+1.25}%`;
+  plunger3.style.bottom = `${percent+9}%`;
+  reading3.textContent = `Level: ${(fraction*1.2).toFixed(2)}`;
+});
+
 
 </script>
 
