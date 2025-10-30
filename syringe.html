@@ -19,8 +19,19 @@
   display: inline-block;
 }
 
-.overlay {
+.overlay-1 {
   position: relative;
+  height: 395px;
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+.overlay-2 {
+  position: absolute;
+  z-index: -10;
+  left: 50%;
+  bottom: 36px;
+  width: 120%;
+  transform: translateX(-50%);
+  transition: bottom 0.4s ease;
   height: 395px;
   pointer-events: none; /* allows clicks to go through transparent image */
 }
@@ -30,16 +41,17 @@
   width: 120px;
   height: 400px;
   /*  overflow: hidden;  */
-  /*  border: 2px solid #666;  */
+  /* border: 2px solid #666;  */
 }
 
 .solution {
   position: absolute;
+  z-index: -15;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 40px;
+  bottom: 37px;
   width: 80%;
-  height: 0%;
+  height: 10%;
   background: linear-gradient(to top, #4db6ff, #81d4fa);
   opacity: 0.5;
   transition: height 0.4s ease;
@@ -48,13 +60,12 @@
 
 .reading {
   position: absolute;
-  top: -40px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 400px;
   font-size: 18px;
   color: #222;
   pointer-events: none;
 }
+
 
 </style>
 </head>
@@ -64,30 +75,35 @@
     <div class="solution" id="solution"></div>
     <div class="reading" id="reading">Level: 0.00</div>
     <img
-      class="overlay"
-      alt="overlay"
+      class="overlay-1"
+      id="overlay1"
       src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
+    />
+    <img
+      class="overlay-2"
+      id="overlay2"
+      src="https://github.com/johannalherman/134-ITE/blob/main/Syring%20Plunger.png?raw=true"
     />
   </div>
 </div>
 
-
 <script>
-  const cylinder = document.getElementById("cylinder");
+const cylinder = document.getElementById("cylinder");
 const solution = document.getElementById("solution");
 const reading = document.getElementById("reading");
+const overlay2 = document.getElementById("overlay2");
 
 // Click to fill simulation
 cylinder.addEventListener("click", (e) => {
   const rect = cylinder.getBoundingClientRect();
   const y = e.clientY - rect.top;
   const height = rect.height;
-  const fraction = Math.max(0, Math.min(1, 0.9 - y / height));
-  const percent = (fraction * 100).toFixed(1);
-  solution.style.height = `${percent}%`;
+  const fraction = Math.max(0, Math.min(1, 0.9075 - y / height));
+  const percent = (fraction * 100);
+  solution.style.height = `${percent+1.25}%`;
+  overlay2.style.bottom = `${percent+9.5}%`;
   reading.textContent = `Level: ${(fraction*1.2).toFixed(2)}`;
 });
-
 
 </script>
 
