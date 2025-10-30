@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Syringe Fill Simulation</title>
 <style>
-body {
+  body {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -13,24 +13,38 @@ body {
   font-family: Arial, sans-serif;
 }
 
+#glassware-container {
+  margin: 20px;
+  position: relative;
+  display: inline-block;
+}
+
+.overlay {
+  position: relative;
+  height: 395px;
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+
 .container {
   position: relative;
-  width: 90px;
-  height: 350px;
+  width: 120px;
+  height: 400px;
   overflow: hidden;
+  border: 2px solid #666;
 }
 
 .solution {
   position: absolute;
-  bottom: 0;
-  width: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 40px;
+  width: 80%;
   height: 0%;
   background: linear-gradient(to top, #4db6ff, #81d4fa);
   opacity: 0.5;
   transition: height 0.4s ease;
   pointer-events: none; /* allow clicks to pass through */
 }
-
 .solution::after {
   content: "";
   position: absolute;
@@ -39,7 +53,7 @@ body {
   transform: translateX(50%);
   width: 100%;
   height: 10px;
-  background: #def1fa;
+  background: #c6e7f6;
   border-radius: 0% 0% 50% 50%;
   z-index: 0;
   pointer-events: none;
@@ -55,30 +69,25 @@ body {
   pointer-events: none;
 }
 
-.overlay {
-  position: absolute;
-  top: 79px;
-  height: 395px;
-  pointer-events: none; /* allows clicks to go through transparent image */
-}
 
 </style>
 </head>
 <body>
-
-<div class="container" id="cylinder">
-  <div class="solution" id="solution"></div>
-  <div class="reading" id="reading">Level: 0.00</div>
+  <div class="glassware-container">
+  <div class="container" id="cylinder">
+    <div class="solution" id="solution"></div>
+    <div class="reading" id="reading">Level: 0.00</div>
+    <img
+      class="overlay"
+      alt="overlay"
+      src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
+    />
+  </div>
 </div>
-  <img
-    class="overlay"
-    alt="overlay"
-    src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
-  />
 
 
 <script>
-const cylinder = document.getElementById("cylinder");
+  const cylinder = document.getElementById("cylinder");
 const solution = document.getElementById("solution");
 const reading = document.getElementById("reading");
 
@@ -88,7 +97,7 @@ cylinder.addEventListener("click", (e) => {
   const y = e.clientY - rect.top;
   const height = rect.height;
   const fraction = Math.max(0, Math.min(1, 1 - y / height));
-  const percent = (fraction * 100).toFixed(1);
+  const percent = (fraction * 100 - 8).toFixed(1);
   solution.style.height = `${percent}%`;
   reading.textContent = `Level: ${fraction.toFixed(2)}`;
 });
