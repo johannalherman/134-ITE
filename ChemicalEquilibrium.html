@@ -1,0 +1,1604 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Spectrum Plot — Absorbance vs Wavelength</title>
+  <style>
+body {
+  width: 1500px;
+  margin: auto;
+  font:
+    18px Arial,
+    sans-serif;
+  padding: 20px;
+  text-align: center;
+}
+.backend {
+  top: 500px;
+  width: 400px;
+}
+
+button {
+  font-size: 16px;
+}
+
+.tab {
+  overflow: hidden;
+  text-align: center;
+}
+/* Style the buttons that are used to open the tab content */
+.tab button {
+  font-size: 22px;
+  padding: 10px 20px;
+  background-image: linear-gradient(#b4c6ff, #e7edff 50%, #b4c6ff);
+  border: 2px solid;
+  border-radius: 5px;
+  cursor: pointer;
+  outline: none;
+  transition: 0.3s;
+}
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #f5f5f5;
+  border: 2px solid white;
+  border-radius: 5px;
+}
+/* Create an active/current tablink class */
+.tab button.active {
+  border: 2px solid;
+  border-radius: 5px;
+  background-color: white;
+}
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 40px;
+  border: 4px solid #cc9900;
+  border-radius: 15px;
+}
+#Tab1 {
+  position: relative;
+  width: 100%;
+  height: 600px; /* or whatever fits your layout */
+  overflow: hidden;
+}
+
+.button-container {
+  text-align: center;
+  z-index: 100;
+}
+.button-container button {
+  margin: 20px 0px 0px 0px;
+  padding: 10px 20px;
+  border: 2px solid;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.button-container button:hover {
+  border: 2px solid white;
+}
+.button-container button:focus {
+  padding: 9px 19px;
+  border: 3px solid #cc9900;
+}
+.control-button {
+  padding: 10px 20px;
+  background-image: linear-gradient(#fff4ad, #fedee6 50%, #fff4ad);
+  border: 2px solid #cc9900;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.control-button:hover {
+  border: 2px solid white;
+}
+.control-button:focus {
+  padding: 9px 19px;
+  border: 3px solid #cc9900;
+}
+
+.row1 {
+  display: flex;
+}
+.column1 {
+  flex: 50%;
+}
+
+.glassware-container-1 {
+  position: relative;
+  width: 1400px;
+  margin: auto;
+}
+.benchtop {
+  position: relative;
+  top: 0px;
+  left: 0px;
+  width: 1400px;
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+.wrap {
+  position: absolute;
+  top: 0px;
+  left: 8px;
+  width: 685px;
+}
+.card {
+  padding: 40px 0px 20px 0px;
+}
+canvas {
+  width: 90%;
+  height: 350px;
+  cursor: pointer;
+  /* border: 1px solid #000; */
+}
+.results {
+  font-size: 20px;
+  text-align: center;
+  margin: -6px 0px -6px 0px;
+}
+.value {
+  font-size: 24px;
+  color: #cc9900;
+  margin: -6px 10px -6px 10px;
+}
+
+.slider-container {
+  position: absolute;
+  display: inline-block;
+  top: 375px;
+  left: 1170px;
+  width: 200px;
+}
+.slider {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 12px;
+  border-radius: 5px;
+  background: linear-gradient(to right, blue, red);
+  outline: none;
+  opacity: 0.95;
+  transition: opacity 0.2s;
+}
+.slider:hover {
+  opacity: 1;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #333;
+  cursor: pointer;
+}
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #333;
+  cursor: pointer;
+}
+#temp-bubble {
+  position: absolute;
+  bottom: -30px;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  pointer-events: none;
+  transition: left 0.05s linear;
+  white-space: nowrap;
+}
+#temp-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+
+  /* Simulation container overlay */
+  #simulation-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 50;
+    pointer-events: none;
+  }
+
+  /* Cube */
+  .cube {
+    width: 30px;
+    height: 90px;
+    position: absolute;
+    cursor: grab;
+    border: 2px solid #333;
+    border-radius: 4px;
+    z-index: 10;
+    pointer-events: auto;
+    background: none;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .cube:active {
+    cursor: grabbing;
+  }
+
+  /* Water inside cube */
+  .water {
+    width: 100%;
+    height: 0%; /* 2/3 fill */
+    background-color: #3399ff;
+  }
+
+  /* Temperature bubble */
+  #temp-bubble-1 {
+    position: absolute;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 14px;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  #temp-bubble-1::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+  }
+
+  /* Marker as X */
+  .marker {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+  }
+
+  .marker::before,
+  .marker::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 40px;
+    height: 4px;
+    transform-origin: center;
+  }
+
+  .marker::before { transform: translate(-50%, -50%) rotate(45deg); }
+  .marker::after { transform: translate(-50%, -50%) rotate(-45deg); }
+
+  /* Radio waves inside markers */
+  .wave {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cc9900;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .wave.active {
+    animation: wave 1s linear infinite;
+    opacity: 0.7;
+  }
+
+  .wave:nth-child(1) { animation-delay: 0s; }
+  .wave:nth-child(2) { animation-delay: 0.3s; }
+  .wave:nth-child(3) { animation-delay: 0.6s; }
+
+  @keyframes wave {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0.7; }
+    100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+  }
+
+
+/* tab 2 */
+.row2 {
+  display: flex;
+}
+.column2 {
+  width: 250px;
+  padding: 0px 20px;
+}
+
+.glassware-container-2 {
+  margin: auto;
+  position: relative;
+  width: 1400px;
+}
+.syringe {
+  position: relative;
+  height: 296.25px; /* 395px; */
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+.plunger {
+  position: absolute;
+  z-index: -10;
+  left: 50%;
+  bottom: 27px; /* 36px; */
+  width: 120%;
+  transform: translateX(-50%);
+  transition: bottom 0.4s ease;
+  height: 296.25px; /* 395px; */
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+.container {
+  position: relative;
+  width: 90px; /* 120px; */
+  height: 300px; /* 400px; */
+  left: 50%;
+  transform: translateX(-50%);
+  /* overflow: hidden; */
+  /* border: 2px solid #666; */
+}
+.solution {
+  position: absolute;
+  z-index: -15;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 27.27px; /* 37px; */
+  width: 80%;
+  height: 89%;
+  background: linear-gradient(to top, #4db6ff, #81d4fa);
+  opacity: 0.5;
+  transition: height 0.4s ease;
+  pointer-events: none; /* allow clicks to pass through */
+}
+.reading {
+  position: absolute;
+  top: 300px;
+  left: 50%;
+  width: 100px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  text-align: center;
+  color: #222;
+  pointer-events: none;
+}
+.beaker {
+  position: absolute;
+  z-index: 0;
+  width: 180px;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 190px;
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+.beaker_solution {
+  position: absolute;
+  z-index: -1;
+  width: 160px;
+  height: 120px;
+  border-radius: 0px 0px 30px 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 272px;
+  background: linear-gradient(to top, #4db6ff, #81d4fa);
+  opacity: 0.5;
+  transition: height 0.4s ease;
+  pointer-events: none; /* allow clicks to pass through */
+}
+.beakerlabels {
+  position: relative;
+  top: 100px;
+  width: 100%;
+  font-size: 20px;
+  text-align: center;
+  color: #222;
+  pointer-events: none;
+}
+
+  </style>
+</head>
+<body>
+<div id="Tab1" class="tabcontent">
+    <div class="tab" style="position: absolute; right: 70px; bottom: 100px; z-index: 100;">
+    <button class="tablinks" onclick="openTabs(event, 'Tab2')">Prepare reaction mixture!</button>
+  </div>
+  <div class="glassware-container-1">
+      <img
+        class="benchtop"
+        id="benchtop"
+      src="https://github.com/johannalherman/134-ITE/blob/main/ComputerSpecTemp.png?raw=true"
+    />
+    <div class="wrap">
+      <div class="card">
+        <div class="results" style="font-style: italic; color: gray;"">
+          Click on graph below to select a wavelength to measure.
+        </div>
+        <div class="row1" style="margin: 20px">
+          <div class="column1">
+            <div class="results">
+              <strong>Selected λ:</strong>
+              <span id="selLambda" class="value">---</span> nm
+            </div>
+          </div>
+          <div class="column1">
+            <div class="results">
+              <strong>Abs:</strong> <span id="selAbs" class="value">-.---</span>
+            </div>
+          </div>
+        </div>
+        <canvas id="plotCanvas" width="800" height="520"></canvas>
+      </div>
+    </div>
+      <div class="slider-container">
+  <div id="temp-bubble">25°C</div>
+    <input type="range" min="10" max="80" value="25" class="slider" id="tempSlider">
+  </div>
+  </div>
+        
+  <!-- Simulation overlay container -->
+  <div id="simulation-container">
+    <div class="cube" id="cube">
+      <div class="water"></div>
+    </div>
+    <div id="temp-bubble-1">25°C</div>
+  </div>
+
+</div>
+
+<div id="Tab2" class="tabcontent">
+    <div class="glassware-container-2">
+      <div class="row2">
+        <div class="column2">
+          <div class="container" id="cylinder1">
+            <div class="solution" id="solution1"></div>
+            <div class="reading" id="reading1">Level: 0.00</div>
+            <img
+              class="syringe"
+              id="syringe1"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
+            />
+            <img
+              class="plunger"
+              id="plunger1"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
+            />
+            <img
+              class="beaker"
+              id="beaker1"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Beaker.png?raw=true"
+            />
+            <div class="beaker_solution" id="beaker_solution1"></div>
+          </div>
+          <div class="beakerlabels" style="text-align: center;">
+            <span id="conc_A0"><strong>Reagent A:</strong> <span class="value">-.-- M</span></span>
+          </div>
+        </div>
+        <div class="column2">
+          <div class="container" id="cylinder2">
+            <div class="solution" id="solution2"></div>
+            <div class="reading" id="reading2">Level: 0.00</div>
+            <img
+              class="syringe"
+              id="syringe2"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
+            />
+            <img
+              class="plunger"
+              id="plunger2"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
+            />
+            <img
+              class="beaker"
+              id="beaker2"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Beaker.png?raw=true"
+            />
+            <div class="beaker_solution" id="beaker_solution2"></div>
+          </div>
+          <div class="beakerlabels" style="text-align: center;">
+            <span id="conc_B0"><strong>Reagent B:</strong> <span class="value">-.-- M</span></span>
+          </div>
+        </div>
+        <div class="column2">
+          <div class="container" id="cylinder3">
+            <div class="solution" id="solution3"></div>
+            <div class="reading" id="reading3">Level: 0.00</div>
+            <img
+              class="syringe"
+              id="syringe3"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
+            />
+            <img
+              class="plunger"
+              id="plunger3"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
+            />
+            <img
+              class="beaker"
+              id="beaker3"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Beaker.png?raw=true"
+            />
+            <div class="beaker_solution" id="beaker_solution3"></div>
+          </div>
+          <div class="beakerlabels" style="text-align: center;">
+            <span><strong>D.I. Water</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab" style="margin: 140px 10px 10px 10px;">
+    <button class="tablinks" onclick="openTabs(event, 'Tab1');" id="defaultOpen">Mix reagents into cuvette!</button>
+  </div>
+
+</div>
+    
+<p style="color: #cc9900; text-align: left">
+  <em
+    >This simulation was designed for use on a laptop or desktop computer.
+    Functions may not operate on a mobile device.</em
+  >
+</p>
+
+<div class="backend">
+  <div style="color: blue; text-align: left">
+    <em>Internal values:</em>
+  <p>
+  <span id="dH" style="text-align: left">dH: <span>000</span> J; </span>
+  <span id="dS" style="text-align: left">dS: <span>000</span> J/K; </span>
+  <span id="dG" style="text-align: left">dG: <span>000</span> J; </span>
+  <span id="Kc" style="text-align: left">Kc: <span>000</span>; </span>
+  </p>
+  <p>
+  <span id="vol_A" style="text-align: left">vol_A: <span>000</span>; </span>
+  <span id="conc_Ai" style="text-align: left">conc_Ai: <span>000</span>; </span>
+  <span id="vol_B" style="text-align: left">vol_B: <span>000</span>; </span>
+  <span id="conc_Bi" style="text-align: left">conc_Bi: <span>000</span>; </span>
+  <span id="vol_solvent" style="text-align: left">vol_solvent: <span>000</span>; </span>
+  </p>
+  <p>
+  <span id="x_num" style="text-align: left">x_num: <span>000</span>; </span>
+  <span id="conc_Af" style="text-align: left">conc_Af: <span>000</span>; </span>
+  <span id="conc_Bf" style="text-align: left">conc_Bf: <span>000</span>; </span>
+  <span id="conc_Cf" style="text-align: left">conc_Cf: <span>000</span>; </span>
+  </p>
+  </div>
+</div>
+
+<script>
+let cR = 8.314; // ideal gas constant
+let dH = -11190;
+let dS = 5.141;
+let dG = -12723;
+
+function update_dH_display() {
+  document.querySelector('#dH span').textContent = dH.toFixed(0);
+}
+function update_dS_display() {
+  document.querySelector('#dS span').textContent = dS.toFixed(3);
+}
+function update_dG_display() {
+  document.querySelector('#dG span').textContent = dG.toFixed(0);
+}
+update_dH_display();
+update_dS_display();
+update_dG_display();
+
+let rxnA = 1;
+let rxnB = 1;
+let rxnC = 2;
+
+let solTemp_C = 100; // in °C
+let cKelvin = 273.1; // conversion factor between °C and Kelvin
+let solTemp_K = solTemp_C + cKelvin;
+
+// tab 2 start //
+let vol_A = 3; // in mL
+let vol_B = 3; // in mL
+let vol_solvent = 0; // in mL
+
+let conc_A0 = 0.01; // in M
+let conc_B0 = 0.01; // in M
+let conc_C = 0; // in M
+
+let conc_Ai = (vol_A * conc_A0) / (vol_A + vol_B + vol_solvent);
+let conc_Bi = (vol_B * conc_B0) / (vol_A + vol_B + vol_solvent);
+
+function update_conc_displays() {
+  document.querySelector('#conc_A0 span').textContent =
+    conc_A0.toExponential(2) + ' M';
+  document.querySelector('#conc_B0 span').textContent =
+    conc_B0.toExponential(2) + ' M';
+}
+update_conc_displays();
+
+function setupSyringe(cylinder, plunger, reading) {
+  cylinder.addEventListener('click', (e) => {
+    const rect = cylinder.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const height = rect.height;
+    const fraction = Math.max(0, Math.min(1, 0.91 - y / height));
+    const percent = fraction * 100;
+
+    // Adjust the plunger position
+    plunger.style.bottom = `${percent + 9}%`;
+
+    // Update the reading display
+    reading.textContent = `Level: ${(fraction * 1.2).toFixed(2)}`;
+  });
+}
+
+setupSyringe(
+  document.getElementById('cylinder1'),
+  document.getElementById('plunger1'),
+  document.getElementById('reading1'),
+);
+setupSyringe(
+  document.getElementById('cylinder2'),
+  document.getElementById('plunger2'),
+  document.getElementById('reading2'),
+);
+setupSyringe(
+  document.getElementById('cylinder3'),
+  document.getElementById('plunger3'),
+  document.getElementById('reading3'),
+);
+
+// tab 2 end //
+
+// tab 1 start //
+// Set Kc
+let Kc = Math.exp(dS / cR - dH / (cR * solTemp_K));
+function update_Kc_display() {
+  document.querySelector('#Kc span').textContent = Kc.toFixed(2);
+}
+update_Kc_display();
+
+function update_conc_displays() {
+  document.querySelector('#vol_A span').textContent = vol_A.toFixed(3);
+  document.querySelector('#conc_Ai span').textContent =
+    conc_Ai.toExponential(3);
+  document.querySelector('#vol_B span').textContent = vol_B.toFixed(3);
+  document.querySelector('#conc_Bi span').textContent =
+    conc_Bi.toExponential(3);
+}
+update_conc_displays();
+
+// determine x value
+let x_num = 0; //must const outside of function!
+const a = conc_Ai;
+const b = conc_Bi;
+const k = Kc;
+
+const D = Math.pow(k, 2) * Math.pow(a + b, 2) + 4 * k * (4 - k) * a * b;
+const m_num = (-k * (a + b) + Math.sqrt(D)) / (2 * (4 - k));
+const n_num = (-k * (a + b) - Math.sqrt(D)) / (2 * (4 - k));
+
+if (m_num > 0 && m_num < Math.max(a, b)) {
+  x_num = m_num;
+} else if (n_num > 0 && n_num < Math.max(a, b)) {
+  x_num = n_num;
+} else {
+  x_num = 0;
+}
+document.querySelector('#x_num span').textContent = x_num.toFixed(6);
+
+const conc_Af = conc_Ai - x_num;
+const conc_Bf = conc_Bi - x_num;
+const conc_Cf = 2 * x_num;
+document.querySelector('#conc_Af span').textContent = conc_Af.toExponential(3);
+document.querySelector('#conc_Bf span').textContent = conc_Bf.toExponential(3);
+document.querySelector('#conc_Cf span').textContent = conc_Cf.toExponential(3);
+
+var bc = {
+  380: 4.47501,
+  381: 4.64876,
+  382: 4.82868,
+  383: 5.01499,
+  384: 5.2079,
+  385: 5.40763,
+  386: 5.6144,
+  387: 5.82845,
+  388: 6.05002,
+  389: 6.27935,
+  390: 6.51672,
+  391: 6.76237,
+  392: 7.0166,
+  393: 7.27969,
+  394: 7.55192,
+  395: 7.83361,
+  396: 8.12507,
+  397: 8.42663,
+  398: 8.73862,
+  399: 9.06139,
+  400: 9.39531,
+  401: 9.74075,
+  402: 10.09809,
+  403: 10.46773,
+  404: 10.85009,
+  405: 11.24559,
+  406: 11.65468,
+  407: 12.07781,
+  408: 12.51546,
+  409: 12.96811,
+  410: 13.43627,
+  411: 13.92048,
+  412: 14.42125,
+  413: 14.93917,
+  414: 15.47481,
+  415: 16.02876,
+  416: 16.60165,
+  417: 17.19411,
+  418: 17.80682,
+  419: 18.44045,
+  420: 19.09572,
+  421: 19.77336,
+  422: 20.47411,
+  423: 21.19877,
+  424: 21.94814,
+  425: 22.72306,
+  426: 23.52438,
+  427: 24.353,
+  428: 25.20983,
+  429: 26.09582,
+  430: 27.01195,
+  431: 27.95922,
+  432: 28.93868,
+  433: 29.95139,
+  434: 30.99847,
+  435: 32.08105,
+  436: 33.20029,
+  437: 34.35742,
+  438: 35.55367,
+  439: 36.79031,
+  440: 38.06867,
+  441: 39.39009,
+  442: 40.75597,
+  443: 42.16773,
+  444: 43.62683,
+  445: 45.13479,
+  446: 46.69313,
+  447: 48.30345,
+  448: 49.96737,
+  449: 51.68654,
+  450: 53.46266,
+  451: 55.29748,
+  452: 57.19277,
+  453: 59.15035,
+  454: 61.17207,
+  455: 63.25982,
+  456: 65.41554,
+  457: 67.64119,
+  458: 69.93878,
+  459: 72.31034,
+  460: 74.75795,
+  461: 77.2837,
+  462: 79.88975,
+  463: 82.57824,
+  464: 85.35138,
+  465: 88.21138,
+  466: 91.16049,
+  467: 94.20098,
+  468: 97.33512,
+  469: 100.56522,
+  470: 103.8936,
+  471: 107.32258,
+  472: 110.8545,
+  473: 114.49169,
+  474: 118.23649,
+  475: 122.09124,
+  476: 126.05827,
+  477: 130.13988,
+  478: 134.33838,
+  479: 138.65604,
+  480: 143.09511,
+  481: 147.6578,
+  482: 152.3463,
+  483: 157.16273,
+  484: 162.10918,
+  485: 167.18769,
+  486: 172.4002,
+  487: 177.74861,
+  488: 183.23475,
+  489: 188.86033,
+  490: 194.62701,
+  491: 200.53631,
+  492: 206.58968,
+  493: 212.78843,
+  494: 219.13376,
+  495: 225.62671,
+  496: 232.26823,
+  497: 239.05907,
+  498: 245.99985,
+  499: 253.09102,
+  500: 260.33286,
+  501: 267.72546,
+  502: 275.26871,
+  503: 282.96232,
+  504: 290.80577,
+  505: 298.79835,
+  506: 306.9391,
+  507: 315.22684,
+  508: 323.66014,
+  509: 332.23735,
+  510: 340.95653,
+  511: 349.81551,
+  512: 358.81182,
+  513: 367.94276,
+  514: 377.20533,
+  515: 386.59623,
+  516: 396.11191,
+  517: 405.7485,
+  518: 415.50186,
+  519: 425.36755,
+  520: 435.34083,
+  521: 445.41666,
+  522: 455.58972,
+  523: 465.85438,
+  524: 476.20472,
+  525: 486.63455,
+  526: 497.13735,
+  527: 507.70637,
+  528: 518.33455,
+  529: 529.01458,
+  530: 539.73886,
+  531: 550.49957,
+  532: 561.28863,
+  533: 572.09771,
+  534: 582.9183,
+  535: 593.74163,
+  536: 604.55876,
+  537: 615.36057,
+  538: 626.13776,
+  539: 636.88086,
+  540: 647.5803,
+  541: 658.22636,
+  542: 668.80923,
+  543: 679.319,
+  544: 689.74571,
+  545: 700.07935,
+  546: 710.30986,
+  547: 720.42721,
+  548: 730.42134,
+  549: 740.28226,
+  550: 750.0,
+  551: 759.56469,
+  552: 768.96654,
+  553: 778.19588,
+  554: 787.24316,
+  555: 796.099,
+  556: 804.75419,
+  557: 813.19972,
+  558: 821.42677,
+  559: 829.42677,
+  560: 837.1914,
+  561: 844.71259,
+  562: 851.98257,
+  563: 858.99385,
+  564: 865.73925,
+  565: 872.21193,
+  566: 878.40539,
+  567: 884.31347,
+  568: 889.93036,
+  569: 895.25065,
+  570: 900.2693,
+  571: 904.98165,
+  572: 909.38343,
+  573: 913.47079,
+  574: 917.24028,
+  575: 920.68885,
+  576: 923.81387,
+  577: 926.61312,
+  578: 929.0848,
+  579: 931.22752,
+  580: 933.04029,
+  581: 934.52254,
+  582: 935.67412,
+  583: 936.49526,
+  584: 936.98658,
+  585: 937.14912,
+  586: 936.98428,
+  587: 936.49384,
+  588: 935.67995,
+  589: 934.54512,
+  590: 933.09219,
+  591: 931.32437,
+  592: 929.24517,
+  593: 926.85844,
+  594: 924.1683,
+  595: 921.1792,
+  596: 917.89585,
+  597: 914.32322,
+  598: 910.46657,
+  599: 906.33135,
+  600: 901.92328,
+  601: 897.24828,
+  602: 892.31247,
+  603: 887.12215,
+  604: 881.68381,
+  605: 876.0041,
+  606: 870.0898,
+  607: 863.94784,
+  608: 857.58526,
+  609: 851.00923,
+  610: 844.22698,
+  611: 837.24585,
+  612: 830.07324,
+  613: 822.7166,
+  614: 815.18345,
+  615: 807.48133,
+  616: 799.61778,
+  617: 791.60039,
+  618: 783.43674,
+  619: 775.13439,
+  620: 766.70088,
+  621: 758.14375,
+  622: 749.47046,
+  623: 740.68846,
+  624: 731.80513,
+  625: 722.82778,
+  626: 713.76367,
+  627: 704.61995,
+  628: 695.40372,
+  629: 686.12196,
+  630: 676.78158,
+  631: 667.38936,
+  632: 657.95198,
+  633: 648.47601,
+  634: 638.96789,
+  635: 629.43396,
+  636: 619.8804,
+  637: 610.31328,
+  638: 600.73853,
+  639: 591.16194,
+  640: 581.58916,
+  641: 572.0257,
+  642: 562.47691,
+  643: 552.94802,
+  644: 543.44408,
+  645: 533.97001,
+  646: 524.53058,
+  647: 515.13038,
+  648: 505.77388,
+  649: 496.46537,
+  650: 487.20902,
+  651: 478.0088,
+  652: 468.86858,
+  653: 459.79202,
+  654: 450.78267,
+  655: 441.84391,
+  656: 432.97899,
+  657: 424.19097,
+  658: 415.48281,
+  659: 406.85728,
+  660: 398.31704,
+  661: 389.86459,
+  662: 381.50229,
+  663: 373.23235,
+  664: 365.05687,
+  665: 356.97779,
+  666: 348.99694,
+  667: 341.11598,
+  668: 333.33649,
+  669: 325.65989,
+  670: 318.0875,
+  671: 310.6205,
+  672: 303.25996,
+  673: 296.00685,
+  674: 288.86199,
+  675: 281.82614,
+  676: 274.89991,
+  677: 268.08383,
+  678: 261.37832,
+  679: 254.78372,
+  680: 248.30025,
+  681: 241.92805,
+  682: 235.66717,
+  683: 229.51757,
+  684: 223.47914,
+  685: 217.55168,
+  686: 211.73491,
+  687: 206.02848,
+  688: 200.43196,
+  689: 194.94487,
+  690: 189.56665,
+  691: 184.29668,
+  692: 179.13427,
+  693: 174.07869,
+  694: 169.12915,
+  695: 164.28481,
+  696: 159.54475,
+  697: 154.90806,
+  698: 150.37373,
+  699: 145.94075,
+  700: 141.60804,
+  701: 137.3745,
+  702: 133.23899,
+  703: 129.20034,
+  704: 125.25736,
+  705: 121.4088,
+  706: 117.65342,
+  707: 113.98993,
+  708: 110.41704,
+  709: 106.93343,
+  710: 103.53776,
+  711: 100.22868,
+  712: 97.00482,
+  713: 93.8648,
+  714: 90.80723,
+  715: 87.83072,
+  716: 84.93387,
+  717: 82.11525,
+  718: 79.37346,
+  719: 76.70708,
+  720: 74.1147,
+  721: 71.59489,
+  722: 69.14624,
+  723: 66.76734,
+  724: 64.45678,
+  725: 62.21314,
+  726: 60.03505,
+  727: 57.9211,
+  728: 55.86991,
+  729: 53.8801,
+  730: 51.95033,
+  731: 50.07922,
+  732: 48.26545,
+  733: 46.50768,
+  734: 44.8046,
+  735: 43.1549,
+  736: 41.5573,
+  737: 40.01053,
+  738: 38.51333,
+  739: 37.06445,
+  740: 35.66268,
+  741: 34.30681,
+  742: 32.99565,
+  743: 31.72801,
+  744: 30.50276,
+  745: 29.31876,
+  746: 28.17488,
+  747: 27.07002,
+  748: 26.00311,
+  749: 24.97309,
+  750: 23.97892,
+  751: 23.01956,
+  752: 22.09402,
+  753: 21.20132,
+  754: 20.34049,
+  755: 19.51058,
+  756: 18.71068,
+  757: 17.93987,
+  758: 17.19726,
+  759: 16.482,
+  760: 15.79324,
+  761: 15.13014,
+  762: 14.49189,
+  763: 13.87772,
+  764: 13.28683,
+  765: 12.71849,
+  766: 12.17196,
+  767: 11.64651,
+  768: 11.14145,
+  769: 10.65611,
+  770: 10.18981,
+  771: 9.74192,
+  772: 9.3118,
+  773: 8.89884,
+  774: 8.50245,
+  775: 8.12205,
+  776: 7.75707,
+  777: 7.40698,
+  778: 7.07123,
+  779: 6.74932,
+  780: 6.44074,
+  781: 6.145,
+  782: 5.86165,
+  783: 5.59021,
+  784: 5.33025,
+  785: 5.08134,
+  786: 4.84305,
+  787: 4.615,
+  788: 4.39678,
+  789: 4.18802,
+  790: 3.98836,
+  791: 3.79744,
+  792: 3.61491,
+  793: 3.44046,
+  794: 3.27375,
+  795: 3.11448,
+  796: 2.96236,
+  797: 2.81709,
+  798: 2.67839,
+  799: 2.546,
+  800: 2.41966,
+  801: 2.29912,
+  802: 2.18414,
+  803: 2.07448,
+  804: 1.96992,
+  805: 1.87025,
+  806: 1.77526,
+  807: 1.68476,
+  808: 1.59853,
+  809: 1.51641,
+  810: 1.43822,
+  811: 1.36378,
+  812: 1.29292,
+  813: 1.2255,
+  814: 1.16136,
+  815: 1.10034,
+  816: 1.04232,
+  817: 0.98716,
+  818: 0.93473,
+  819: 0.8849,
+  820: 0.83755,
+  821: 0.79258,
+  822: 0.74987,
+  823: 0.70931,
+  824: 0.67081,
+  825: 0.63427,
+  826: 0.5996,
+  827: 0.56671,
+  828: 0.53551,
+  829: 0.50593,
+  830: 0.47788,
+  831: 0.4513,
+  832: 0.42611,
+  833: 0.40224,
+  834: 0.37963,
+  835: 0.35822,
+  836: 0.33795,
+  837: 0.31875,
+  838: 0.30059,
+  839: 0.28341,
+  840: 0.26715,
+  841: 0.25177,
+  842: 0.23723,
+  843: 0.22349,
+  844: 0.2105,
+  845: 0.19822,
+  846: 0.18662,
+  847: 0.17566,
+  848: 0.16532,
+  849: 0.15555,
+  850: 0.14632,
+  851: 0.13762,
+  852: 0.12941,
+  853: 0.12166,
+  854: 0.11436,
+  855: 0.10747,
+  856: 0.10097,
+  857: 0.09485,
+  858: 0.08908,
+  859: 0.08365,
+  860: 0.07853,
+  861: 0.0737,
+  862: 0.06916,
+  863: 0.06489,
+  864: 0.06087,
+  865: 0.05709,
+  866: 0.05353,
+  867: 0.05018,
+  868: 0.04703,
+  869: 0.04407,
+  870: 0.04129,
+  871: 0.03868,
+  872: 0.03622,
+  873: 0.03391,
+  874: 0.03175,
+  875: 0.02971,
+  876: 0.0278,
+  877: 0.02601,
+  878: 0.02433,
+  879: 0.02275,
+  880: 0.02127,
+  881: 0.01988,
+  882: 0.01858,
+  883: 0.01736,
+  884: 0.01622,
+  885: 0.01515,
+  886: 0.01415,
+  887: 0.01321,
+  888: 0.01233,
+  889: 0.01151,
+  890: 0.01074,
+  891: 0.01002,
+  892: 0.00934,
+  893: 0.00871,
+  894: 0.00812,
+  895: 0.00757,
+  896: 0.00705,
+  897: 0.00657,
+  898: 0.00612,
+  899: 0.0057,
+  900: 0.00531,
+  901: 0.00494,
+  902: 0.0046,
+  903: 0.00428,
+  904: 0.00398,
+  905: 0.00371,
+  906: 0.00345,
+  907: 0.0032,
+  908: 0.00298,
+  909: 0.00277,
+  910: 0.00257,
+  911: 0.00239,
+  912: 0.00222,
+  913: 0.00206,
+  914: 0.00191,
+  915: 0.00178,
+  916: 0.00165,
+  917: 0.00153,
+  918: 0.00142,
+  919: 0.00132,
+  920: 0.00122,
+  921: 0.00113,
+  922: 0.00105,
+  923: 0.00097,
+  924: 0.0009,
+  925: 0.00084,
+  926: 0.00077,
+  927: 0.00072,
+  928: 0.00066,
+  929: 0.00061,
+  930: 0.00057,
+  931: 0.00053,
+  932: 0.00049,
+  933: 0.00045,
+  934: 0.00042,
+  935: 0.00038,
+  936: 0.00036,
+  937: 0.00033,
+  938: 0.0003,
+  939: 0.00028,
+  940: 0.00026,
+  941: 0.00024,
+  942: 0.00022,
+  943: 0.0002,
+  944: 0.00019,
+  945: 0.00017,
+  946: 0.00016,
+  947: 0.00015,
+  948: 0.00014,
+  949: 0.00013,
+  950: 0.00012,
+};
+
+// Spectrum Plot// Create data array from object bc
+let data = Object.keys(bc).map((w) => ({
+  w: Number(w),
+  a: conc_Af * bc[w],
+}));
+let selected = { lambda: null, absorbance: null };
+
+const canvas = document.getElementById('plotCanvas');
+const ctx = canvas.getContext('2d');
+const margin = { l: 100, r: 50, t: 24, b: 100 };
+let xMin = 380,
+  xMax = 930,
+  yMin = 0,
+  yMax = 1;
+
+function transformX(w) {
+  return (
+    margin.l +
+    ((w - xMin) / (xMax - xMin)) * (canvas.width - margin.l - margin.r)
+  );
+}
+function transformY(a) {
+  return (
+    margin.t +
+    (1 - (a - yMin) / (yMax - yMin)) * (canvas.height - margin.t - margin.b)
+  );
+}
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawAxes() {
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(
+    margin.l,
+    margin.t,
+    canvas.width - margin.l - margin.r,
+    canvas.height - margin.t - margin.b,
+  );
+  ctx.strokeStyle = 'lightgray';
+  ctx.lineWidth = 1;
+  ctx.font = '16px Arial';
+  ctx.fillStyle = '#000';
+
+  // x ticks
+  const xTicks = 5;
+  for (let i = 0; i <= xTicks; i++) {
+    const t = xMin + ((xMax - xMin) * i) / xTicks;
+    const x = transformX(t);
+    ctx.font = '16px Arial';
+    ctx.beginPath();
+    ctx.moveTo(x, margin.t);
+    ctx.lineTo(x, canvas.height - margin.b);
+    ctx.stroke();
+    ctx.fillText(Math.round(t) + ' nm', x - 18, canvas.height - margin.b + 32);
+  }
+
+  // y ticks
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const a = yMin + ((yMax - yMin) * i) / yTicks;
+    const y = transformY(a);
+    ctx.beginPath();
+    ctx.moveTo(margin.l, y);
+    ctx.lineTo(canvas.width - margin.r, y);
+    ctx.stroke();
+    ctx.fillText(a.toFixed(1), 70, y + 4);
+  }
+
+  ctx.save();
+  ctx.font = '24px Arial';
+  ctx.translate(margin.l / 2, canvas.height / 2 + 20);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('Absorbance', 0, -20);
+  ctx.restore();
+  ctx.font = '24px Arial';
+  ctx.fillText(
+    'Wavelength (nm)',
+    canvas.width / 2 - 40,
+    canvas.height - margin.b + 75,
+  );
+}
+
+function drawSpectrum(data) {
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < data.length; i++) {
+    const p = data[i];
+    const x = transformX(p.w);
+    const y = transformY(p.a);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+function render() {
+  clearCanvas();
+  drawAxes();
+  drawSpectrum(data);
+}
+
+function drawIndicatorLine(lambda) {
+  const x = transformX(lambda);
+  ctx.strokeStyle = '#cc9900';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(x, margin.t);
+  ctx.lineTo(x, canvas.height - margin.b);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+canvas.addEventListener('click', (ev) => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const mx = (ev.clientX - rect.left) * scaleX;
+  const W = canvas.width - margin.l - margin.r;
+  const frac = (mx - margin.l) / W;
+  const w = xMin + frac * (xMax - xMin);
+  let nearest = data.reduce((prev, cur) =>
+    Math.abs(cur.w - w) < Math.abs(prev.w - w) ? cur : prev,
+  );
+  selected.lambda = nearest.w;
+  selected.absorbance = nearest.a;
+  document.getElementById('selLambda').textContent = selected.lambda.toFixed(0);
+  document.getElementById('selAbs').textContent =
+    selected.absorbance.toFixed(3);
+  render();
+  const x = transformX(selected.lambda),
+    y = transformY(selected.absorbance);
+  ctx.fillStyle = '#cc9900';
+  ctx.beginPath();
+  ctx.arc(x, y, 8, 0, Math.PI * 2);
+  ctx.fill();
+  drawIndicatorLine(selected.lambda);
+});
+
+window.getSelectedWavelength = () => selected.lambda;
+window.getSelectedAbsorbance = () => selected.absorbance;
+
+(function init() {
+  xMin = Math.min(...data.map((p) => p.w));
+  xMax = Math.max(...data.map((p) => p.w));
+  yMin = 0;
+  yMax = 1;
+  render();
+})();
+
+const slider = document.getElementById('tempSlider');
+const bubble = document.getElementById('temp-bubble');
+function updateBubble() {
+  const temp = Number(slider.value);
+  bubble.textContent = `${temp}°C`;
+
+  const sliderWidth = slider.offsetWidth;
+  const thumbWidth = 20;
+  const percent =
+    (temp - Number(slider.min)) / (Number(slider.max) - Number(slider.min));
+  const offsetX = percent * (sliderWidth - thumbWidth) + thumbWidth / 2;
+  bubble.style.left = `${offsetX}px`;
+}
+slider.addEventListener('input', updateBubble);
+window.addEventListener('DOMContentLoaded', () => {
+  slider.value = 25;
+  updateBubble();
+});
+
+const cube = document.getElementById('cube');
+const tempBubble = document.getElementById('temp-bubble-1');
+const container = document.getElementById('simulation-container');
+
+const cubeWidth = 30;
+const cubeHeight = 90;
+
+// Define positions (adjust as needed)
+const positions = [
+  { x: 1160, y: 538 },
+  { x: 1035, y: 538 },
+  { x: 1054, y: 338 },
+  { x: 1359, y: 338 },
+];
+
+let markers = [];
+
+// Dynamically create markers and waves inside container
+positions.forEach((pos) => {
+  const marker = document.createElement('div');
+  marker.classList.add('marker');
+  marker.style.left = pos.x + 'px';
+  marker.style.top = pos.y + 'px';
+
+  for (let i = 0; i < 3; i++) {
+    const wave = document.createElement('div');
+    wave.classList.add('wave');
+    marker.appendChild(wave);
+  }
+
+  container.appendChild(marker);
+  markers.push(marker);
+});
+
+function setCubePosition(pos) {
+  cube.style.left = pos.x - cubeWidth / 2 + 'px';
+  cube.style.top = pos.y - cubeHeight / 2 + 'px';
+  updateBubblePosition();
+}
+
+// Start at first position
+setCubePosition(positions[0]);
+
+let offsetX, offsetY;
+let isDragging = false;
+
+function updateBubblePosition() {
+  const cubeRect = cube.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+  tempBubble.style.left =
+    cubeRect.left + cubeRect.width / 2 - containerRect.left + 'px';
+  tempBubble.style.top = cubeRect.top - 35 - containerRect.top + 'px'; // 15px higher than default
+}
+
+cube.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  offsetX = e.clientX - cube.offsetLeft;
+  offsetY = e.clientY - cube.offsetTop;
+
+  // Activate waves
+  markers.forEach((marker) => {
+    marker
+      .querySelectorAll('.wave')
+      .forEach((wave) => wave.classList.add('active'));
+  });
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (isDragging) {
+    cube.style.left = e.clientX - offsetX - container.offsetLeft + 'px';
+    cube.style.top = e.clientY - offsetY - container.offsetTop + 'px';
+    updateBubblePosition();
+  }
+});
+
+let nearest = {
+  x: 1300,
+  y: 700,
+}; // use nearest["x"] OR nearest.x to find current x position!
+document.addEventListener('mouseup', () => {
+  if (isDragging) {
+    isDragging = false;
+
+    // Deactivate waves
+    markers.forEach((marker) => {
+      marker
+        .querySelectorAll('.wave')
+        .forEach((wave) => wave.classList.remove('active'));
+    });
+
+    // Snap to nearest position
+    nearest = positions[0];
+    let minDist = distance(
+      cube.offsetLeft + cubeWidth / 2,
+      cube.offsetTop + cubeHeight / 2,
+      nearest.x,
+      nearest.y,
+    );
+
+    positions.forEach((pos) => {
+      const dist = distance(
+        cube.offsetLeft + cubeWidth / 2,
+        cube.offsetTop + cubeHeight / 2,
+        pos.x,
+        pos.y,
+      );
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = pos;
+      }
+    });
+
+    setCubePosition(nearest);
+  }
+});
+
+function distance(x1, y1, x2, y2) {
+  return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+}
+
+// end tab 2 //
+
+function openTabs(evt, Sim_part) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
+
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = document.getElementsByClassName('tabcontent');
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = 'none';
+  }
+
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = document.getElementsByClassName('tablinks');
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(' active', '');
+  }
+
+  // Show the current tab, and add an "active" class to the button that opened the tab
+  document.getElementById(Sim_part).style.display = 'block';
+  evt.currentTarget.className += ' active';
+}
+
+// Get the element with id="defaultOpen" and click on it
+document.getElementById('defaultOpen').click();
+
+</script>
+</body>
+</html>
