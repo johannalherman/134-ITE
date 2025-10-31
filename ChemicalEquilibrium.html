@@ -181,7 +181,7 @@ canvas {
   border: 2px solid #333;
   cursor: pointer;
 }
-#temp-bubble {
+#temp-bubble-bath {
   position: absolute;
   bottom: -30px;
   transform: translateX(-50%);
@@ -194,7 +194,7 @@ canvas {
   transition: left 0.05s linear;
   white-space: nowrap;
 }
-#temp-bubble::after {
+#temp-bubble-bath::after {
   content: "";
   position: absolute;
   bottom: -6px;
@@ -244,7 +244,7 @@ canvas {
   }
 
   /* Temperature bubble */
-  #temp-bubble-1 {
+  #temp-bubble-cuv {
     position: absolute;
     transform: translateX(-50%);
     background-color: #333;
@@ -256,7 +256,7 @@ canvas {
     white-space: nowrap;
   }
 
-  #temp-bubble-1::after {
+  #temp-bubble-cuv::after {
     content: "";
     position: absolute;
     bottom: -10px;
@@ -324,7 +324,7 @@ canvas {
   display: flex;
 }
 .column2 {
-  width: 33%;
+  width: 30%;
   padding: 0px 20px;
 }
 
@@ -415,6 +415,7 @@ canvas {
   pointer-events: none;
 }
 
+
   </style>
 </head>
 <body>
@@ -450,7 +451,7 @@ canvas {
       </div>
     </div>
       <div class="slider-container">
-  <div id="temp-bubble">25°C</div>
+  <div id="temp-bubble-bath">25°C</div>
     <input type="range" min="10" max="80" value="25" class="slider" id="tempSlider">
   </div>
   </div>
@@ -460,7 +461,7 @@ canvas {
     <div class="cube" id="cube">
       <div class="water"></div>
     </div>
-    <div id="temp-bubble-1">25°C</div>
+    <div id="temp-bubble-cuv">20°C</div>
   </div>
 
 </div>
@@ -581,6 +582,9 @@ canvas {
   <span id="conc_Bf" style="text-align: left">conc_Bf: <span>000</span>; </span>
   <span id="conc_Cf" style="text-align: left">conc_Cf: <span>000</span>; </span>
   </p>
+  <p>
+  <span id="bathTemp_C" style="text-align: left">bathTemp_C: <span>000</span> °C; </span>
+  </p>
   </div>
 </div>
 
@@ -607,7 +611,7 @@ let rxnA = 1;
 let rxnB = 1;
 let rxnC = 2;
 
-let solTemp_C = 100; // in °C
+let solTemp_C = 20; // in °C
 let cKelvin = 273.1; // conversion factor between °C and Kelvin
 let solTemp_K = solTemp_C + cKelvin;
 
@@ -1434,27 +1438,40 @@ window.getSelectedAbsorbance = () => selected.absorbance;
   render();
 })();
 
+// water bath slider (start)
+let bathTemp_C = 25; // in °C
+let iceTemp_C = -10; // in °C
+document.querySelector('#bathTemp_C span').textContent = bathTemp_C.toFixed(1);
+
 const slider = document.getElementById('tempSlider');
-const bubble = document.getElementById('temp-bubble');
+const bubble = document.getElementById('temp-bubble-bath');
+
 function updateBubble() {
   const temp = Number(slider.value);
-  bubble.textContent = `${temp}°C`;
+  bubble.textContent = temp.toFixed(1);
 
   const sliderWidth = slider.offsetWidth;
-  const thumbWidth = 20;
+  const thumbWidth = 30;
   const percent =
     (temp - Number(slider.min)) / (Number(slider.max) - Number(slider.min));
   const offsetX = percent * (sliderWidth - thumbWidth) + thumbWidth / 2;
   bubble.style.left = `${offsetX}px`;
+
+  // Update external variable
+  bathTemp_C = temp;
+  document.querySelector('#bathTemp_C span').textContent = bathTemp_C.toFixed(1);
 }
+
 slider.addEventListener('input', updateBubble);
 window.addEventListener('DOMContentLoaded', () => {
-  slider.value = 25;
+  slider.value = bathTemp_C;
   updateBubble();
 });
 
+// cuvette object (start)
 const cube = document.getElementById('cube');
-const tempBubble = document.getElementById('temp-bubble-1');
+const tempBubble_cuv = document.getElementById('temp-bubble-cuv');
+tempBubble_cuv.textContent = `${solTemp_C}°C`;
 const container = document.getElementById('simulation-container');
 
 const cubeWidth = 30;
@@ -1462,12 +1479,12 @@ const cubeHeight = 90;
 
 // Define positions (adjust as needed)
 const positions = [
-  { x: 1160, y: 538 },
-  { x: 1035, y: 538 },
-  { x: 1054, y: 338 },
-  { x: 1359, y: 338 },
+  { x: 1160, y: 538 }, // start
+  { x: 1035, y: 538 }, // spec
+  { x: 1054, y: 338 }, // ice bath
+  { x: 1359, y: 338 }, // water bath
 ];
-
+let nearest = positions[0]; // use nearest["x"] OR nearest.x to find current x position
 let markers = [];
 
 // Dynamically create markers and waves inside container
@@ -1487,10 +1504,19 @@ positions.forEach((pos) => {
   markers.push(marker);
 });
 
+function update_cuvTemp() {
+  if (nearest.x == positions[2].x) {
+    tempBubble_cuv.textContent = `${iceTemp_C}°C`;
+  } else if (nearest.x == positions[3].x) {
+    tempBubble_cuv.textContent = `${bathTemp_C}°C`;
+  }
+}
+
 function setCubePosition(pos) {
   cube.style.left = pos.x - cubeWidth / 2 + 'px';
   cube.style.top = pos.y - cubeHeight / 2 + 'px';
   updateBubblePosition();
+  update_cuvTemp();
 }
 
 // Start at first position
@@ -1502,9 +1528,9 @@ let isDragging = false;
 function updateBubblePosition() {
   const cubeRect = cube.getBoundingClientRect();
   const containerRect = container.getBoundingClientRect();
-  tempBubble.style.left =
+  tempBubble_cuv.style.left =
     cubeRect.left + cubeRect.width / 2 - containerRect.left + 'px';
-  tempBubble.style.top = cubeRect.top - 35 - containerRect.top + 'px'; // 15px higher than default
+  tempBubble_cuv.style.top = cubeRect.top - 35 - containerRect.top + 'px'; // 15px higher than default
 }
 
 cube.addEventListener('mousedown', (e) => {
@@ -1528,10 +1554,6 @@ document.addEventListener('mousemove', (e) => {
   }
 });
 
-let nearest = {
-  x: 1300,
-  y: 700,
-}; // use nearest["x"] OR nearest.x to find current x position!
 document.addEventListener('mouseup', () => {
   if (isDragging) {
     isDragging = false;
@@ -1573,6 +1595,13 @@ function distance(x1, y1, x2, y2) {
   return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
 }
 
+// Update temperature dynamically
+ tempSlider.addEventListener('input', () => {
+    if (nearest.x == positions[3].x) {
+      tempBubble_cuv.textContent = `${tempSlider.value}°C`;
+    }
+ });
+
 // end tab 2 //
 
 function openTabs(evt, Sim_part) {
@@ -1598,6 +1627,10 @@ function openTabs(evt, Sim_part) {
 
 // Get the element with id="defaultOpen" and click on it
 document.getElementById('defaultOpen').click();
+
+
+// use tempBubble_cuv.value to get cuvette solution temp
+
 
 </script>
 </body>
