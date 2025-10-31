@@ -8,7 +8,8 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    touch-action: none; /* prevent default touch gestures like pull-to-refresh */
+    touch-action: none; /* prevent scrolling and default touch gestures */
+    overscroll-behavior: none; /* prevent pull-to-refresh and scrolling on touch drag */
   }
 
   .tabcontent {
@@ -43,7 +44,7 @@ body {
     align-items: flex-end;
     justify-content: center;
     overflow: hidden;
-    touch-action: none; /* ensure dragging doesn't trigger scroll */
+    touch-action: none;
   }
 
   .cube:active { cursor: grabbing; }
