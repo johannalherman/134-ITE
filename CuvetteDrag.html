@@ -8,6 +8,7 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
+    touch-action: none; /* prevent default touch gestures like pull-to-refresh */
   }
 
   .tabcontent {
@@ -42,17 +43,12 @@ body {
     align-items: flex-end;
     justify-content: center;
     overflow: hidden;
+    touch-action: none; /* ensure dragging doesn't trigger scroll */
   }
 
-  .cube:active {
-    cursor: grabbing;
-  }
+  .cube:active { cursor: grabbing; }
 
-  .water {
-    width: 100%;
-    height: 75%;
-    background-color: #3399ff;
-  }
+  .water { width: 100%; height: 75%; background-color: #3399ff; }
 
   #temp-bubble {
     position: absolute;
@@ -77,175 +73,77 @@ body {
     border-color: #333 transparent transparent transparent;
   }
 
-  .marker {
-    width: 40px;
-    height: 40px;
-    position: absolute;
-    transform: translate(-50%, -50%);
-    z-index: 1;
+  .marker { width: 40px; height: 40px; position: absolute; transform: translate(-50%, -50%); z-index: 1; }
+  .marker::before, .marker::after {
+    content: ''; position: absolute; left: 50%; top: 50%; width: 40px; height: 4px; background-color: #cc9900; transform-origin: center;
   }
-
-  .marker::before,
-  .marker::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 40px;
-    height: 4px;
-    background-color: #cc9900;
-    transform-origin: center;
-  }
-
   .marker::before { transform: translate(-50%, -50%) rotate(45deg); }
   .marker::after { transform: translate(-50%, -50%) rotate(-45deg); }
 
-  .wave {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 20px;
-    height: 20px;
-    border: 2px solid #cc9900;
-    border-radius: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .wave.active {
-    animation: wave 1s linear infinite;
-    opacity: 0.7;
-  }
-
+  .wave { position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; border: 2px solid #cc9900; border-radius: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; pointer-events: none; }
+  .wave.active { animation: wave 1s linear infinite; opacity: 0.7; }
   .wave:nth-child(1) { animation-delay: 0s; }
   .wave:nth-child(2) { animation-delay: 0.3s; }
   .wave:nth-child(3) { animation-delay: 0.6s; }
 
-  @keyframes wave {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0.7; }
-    100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
-  }
+  @keyframes wave { 0% { transform: translate(-50%, -50%) scale(0); opacity: 0.7; } 100% { transform: translate(-50%, -50%) scale(4); opacity: 0; } }
   </style>
 </head>
 <body>
 <div class="tabcontent" id="myTab">
   <div id="simulation-container">
-    <div class="cube" id="cube">
-      <div class="water"></div>
-    </div>
+    <div class="cube" id="cube"><div class="water"></div></div>
     <div id="temp-bubble">25°C</div>
-
-    <!-- Temperature control slider -->
     <div style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); text-align:center;">
       <input type="range" id="temp-slider" min="10" max="80" value="25" step="1" style="width:300px;">
       <div style="color:#333; font-weight:bold;">Temperature Control</div>
     </div>
   </div>
 </div>
-
 <script>
 const cube = document.getElementById('cube');
 const tempBubble = document.getElementById('temp-bubble');
 const tempSlider = document.getElementById('temp-slider');
 const container = document.getElementById('simulation-container');
+const cubeWidth = 30; const cubeHeight = 90;
 
-const cubeWidth = 30;
-const cubeHeight = 90;
-
-const positions = [
-  { x: 100, y: 100 },
-  { x: 500, y: 200 },
-  { x: 100, y: 400 },
-  { x: 400, y: 400 },
-];
-
+const positions = [ { x: 100, y: 100 }, { x: 500, y: 200 }, { x: 100, y: 400 }, { x: 400, y: 400 } ];
 let markers = [];
-
 positions.forEach(pos => {
-  const marker = document.createElement('div');
-  marker.classList.add('marker');
-  marker.style.left = pos.x + 'px';
-  marker.style.top = pos.y + 'px';
-
-  for (let i = 0; i < 3; i++) {
-    const wave = document.createElement('div');
-    wave.classList.add('wave');
-    marker.appendChild(wave);
-  }
-
-  container.appendChild(marker);
-  markers.push(marker);
+  const marker = document.createElement('div'); marker.classList.add('marker');
+  marker.style.left = pos.x + 'px'; marker.style.top = pos.y + 'px';
+  for (let i = 0; i < 3; i++) { const wave = document.createElement('div'); wave.classList.add('wave'); marker.appendChild(wave); }
+  container.appendChild(marker); markers.push(marker);
 });
 
-function setCubePosition(pos) {
-  cube.style.left = pos.x - cubeWidth / 2 + 'px';
-  cube.style.top = pos.y - cubeHeight / 2 + 'px';
-  updateBubblePosition();
-}
-
+function setCubePosition(pos) { cube.style.left = pos.x - cubeWidth / 2 + 'px'; cube.style.top = pos.y - cubeHeight / 2 + 'px'; updateBubblePosition(); }
 setCubePosition(positions[0]);
 
-let offsetX, offsetY;
-let isDragging = false;
-
+let offsetX, offsetY; let isDragging = false;
 function updateBubblePosition() {
-  const cubeRect = cube.getBoundingClientRect();
-  const containerRect = container.getBoundingClientRect();
+  const cubeRect = cube.getBoundingClientRect(); const containerRect = container.getBoundingClientRect();
   tempBubble.style.left = (cubeRect.left + cubeRect.width / 2 - containerRect.left) + 'px';
   tempBubble.style.top = (cubeRect.top - 35 - containerRect.top) + 'px';
 }
 
 function startDrag(x, y) {
-  isDragging = true;
-  offsetX = x - cube.offsetLeft;
-  offsetY = y - cube.offsetTop;
-
-  markers.forEach(marker => {
-    marker.querySelectorAll('.wave').forEach(wave => wave.classList.add('active'));
-  });
+  isDragging = true; offsetX = x - cube.offsetLeft; offsetY = y - cube.offsetTop;
+  markers.forEach(marker => marker.querySelectorAll('.wave').forEach(wave => wave.classList.add('active')));
 }
-
-function moveDrag(x, y) {
-  if (isDragging) {
-    cube.style.left = x - offsetX - container.offsetLeft + 'px';
-    cube.style.top = y - offsetY - container.offsetTop + 'px';
-    updateBubblePosition();
-  }
-}
-
+function moveDrag(x, y) { if (isDragging) { cube.style.left = x - offsetX - container.offsetLeft + 'px'; cube.style.top = y - offsetY - container.offsetTop + 'px'; updateBubblePosition(); } }
 function endDrag() {
-  if (isDragging) {
-    isDragging = false;
-
-    markers.forEach(marker => {
-      marker.querySelectorAll('.wave').forEach(wave => wave.classList.remove('active'));
-    });
-
-    let nearest = positions[0];
-    let minDist = distance(
-      cube.offsetLeft + cubeWidth / 2,
-      cube.offsetTop + cubeHeight / 2,
-      nearest.x,
-      nearest.y
-    );
-
-    positions.forEach(pos => {
-      const dist = distance(
-        cube.offsetLeft + cubeWidth / 2,
-        cube.offsetTop + cubeHeight / 2,
-        pos.x,
-        pos.y
-      );
-      if (dist < minDist) {
-        minDist = dist;
-        nearest = pos;
-      }
-    });
-
-    setCubePosition(nearest);
-  }
+  if (!isDragging) return;
+  isDragging = false;
+  markers.forEach(marker => marker.querySelectorAll('.wave').forEach(wave => wave.classList.remove('active')));
+  let nearest = positions[0];
+  let minDist = distance(cube.offsetLeft + cubeWidth / 2, cube.offsetTop + cubeHeight / 2, nearest.x, nearest.y);
+  positions.forEach(pos => {
+    const dist = distance(cube.offsetLeft + cubeWidth / 2, cube.offsetTop + cubeHeight / 2, pos.x, pos.y);
+    if (dist < minDist) { minDist = dist; nearest = pos; }
+  });
+  setCubePosition(nearest);
 }
+function distance(x1, y1, x2, y2) { return Math.sqrt((x1 - x2)**2 + (y1 - y2)**2); }
 
 // Mouse events
 cube.addEventListener('mousedown', e => startDrag(e.clientX, e.clientY));
@@ -253,26 +151,12 @@ document.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
 document.addEventListener('mouseup', endDrag);
 
 // Touch events
-cube.addEventListener('touchstart', e => {
-  const touch = e.touches[0];
-  startDrag(touch.clientX, touch.clientY);
-});
+cube.addEventListener('touchstart', e => { e.preventDefault(); const touch = e.touches[0]; startDrag(touch.clientX, touch.clientY); });
+document.addEventListener('touchmove', e => { e.preventDefault(); const touch = e.touches[0]; moveDrag(touch.clientX, touch.clientY); });
+document.addEventListener('touchend', e => { e.preventDefault(); endDrag(); });
 
-document.addEventListener('touchmove', e => {
-  const touch = e.touches[0];
-  moveDrag(touch.clientX, touch.clientY);
-});
-
-document.addEventListener('touchend', endDrag);
-
-function distance(x1, y1, x2, y2) {
-  return Math.sqrt((x1 - x2)**2 + (y1 - y2)**2);
-}
-
-// Update temperature dynamically
-tempSlider.addEventListener('input', () => {
-  tempBubble.textContent = `${tempSlider.value}°C`;
-});
+// Temperature slider
+tempSlider.addEventListener('input', () => { tempBubble.textContent = `${tempSlider.value}°C`; });
 </script>
 </body>
 </html>
