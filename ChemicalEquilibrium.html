@@ -13,6 +13,11 @@ body {
     sans-serif;
   padding: 20px;
   text-align: center;
+
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 .backend {
   top: 500px;
@@ -83,8 +88,8 @@ button {
 }
 .control-button {
   padding: 10px 20px;
-  background-image: linear-gradient(#fff4ad, #fedee6 50%, #fff4ad);
-  border: 2px solid #cc9900;
+  background-image: linear-gradient(#edbf35, #fff4ad 50%, #edbf35);
+  border: 2px solid black;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -114,6 +119,21 @@ button {
   top: 0px;
   left: 0px;
   width: 1400px;
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+.spec-top {
+  position: absolute;
+  bottom: 130px;
+  left: 725px;
+  width: 300px;
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+.spec-bottom {
+  position: absolute;
+  z-index: 100;
+  bottom: 0px;
+  left: 725px;
+  width: 300px;
   pointer-events: none; /* allows clicks to go through transparent image */
 }
 .wrap {
@@ -216,12 +236,12 @@ canvas {
 
   /* Cube */
   .cube {
-    width: 30px;
-    height: 90px;
+    width: 26px;
+    height: 88px;
     position: absolute;
     cursor: grab;
     border: 2px solid #333;
-    border-radius: 4px;
+    border-radius: 2px;
     z-index: 10;
     pointer-events: auto;
     background: none;
@@ -292,6 +312,7 @@ canvas {
   /* Radio waves inside markers */
   .wave {
     position: absolute;
+    z-index: 1000;
     left: 50%;
     top: 50%;
     width: 20px;
@@ -306,6 +327,7 @@ canvas {
   .wave.active {
     animation: wave 1s linear infinite;
     opacity: 0.7;
+    z-index: 1000;
   }
 
   .wave:nth-child(1) { animation-delay: 0s; }
@@ -414,22 +436,31 @@ canvas {
   pointer-events: none;
 }
 
+
   </style>
 </head>
 <body>
 <div id="Tab1" class="tabcontent">
     <div class="tab" style="position: absolute; right: 70px; bottom: 100px; z-index: 100;">
-    <button class="tablinks" onclick="openTabs(event, 'Tab2')">Prepare reaction mixture!</button>
-  </div>
+      <button class="tablinks" onclick="openTabs(event, 'Tab2')">Prepare reaction mixture!</button>
+    </div>
+  <button id="resetButton" class="control-button" style="font-size: 22px; position: absolute; right: 40px; top: 40px; z-index: 100;">Reset All Controls</button>
   <div class="glassware-container-1">
       <img
         class="benchtop"
-        id="benchtop"
       src="https://github.com/johannalherman/134-ITE/blob/main/ComputerSpecTemp.png?raw=true"
+    />
+      <img
+        class="spec-top"
+      src="https://github.com/johannalherman/134-ITE/blob/main/spec%20top.png?raw=true"
+    />
+      <img
+        class="spec-bottom"
+      src="https://github.com/johannalherman/134-ITE/blob/main/spec%20bottom.png?raw=true"
     />
     <div class="wrap">
       <div class="card">
-        <div class="results" style="font-style: italic; color: darkblue;"">
+        <div class="results" style="font-style: italic; color: #cc9900;"">
           Click on graph below to select a wavelength to measure.
         </div>
         <div class="row1" style="margin: 20px">
@@ -470,7 +501,6 @@ canvas {
         <div class="column2">
           <div class="container" id="cylinder1">
             <div class="solution" id="solution1"></div>
-            <div class="reading" id="reading1">Level: <span>0.00</span></div>
             <img
               class="syringe"
               id="syringe1"
@@ -495,7 +525,6 @@ canvas {
         <div class="column2">
           <div class="container" id="cylinder2">
             <div class="solution" id="solution2"></div>
-            <div class="reading" id="reading2">Level: 0.00</div>
             <img
               class="syringe"
               id="syringe2"
@@ -520,7 +549,6 @@ canvas {
         <div class="column2">
           <div class="container" id="cylinder3">
             <div class="solution" id="solution3"></div>
-            <div class="reading" id="reading3">Level: 0.00</div>
             <img
               class="syringe"
               id="syringe3"
@@ -550,41 +578,10 @@ canvas {
   </div>
 
 </div>
-    
-<p style="color: #cc9900; text-align: left">
-  <em
-    >This simulation was designed for use on a laptop or desktop computer.
-    Functions may not operate on a mobile device.</em
-  >
-</p>
 
-<div class="backend">
-  <div style="color: blue; text-align: left">
-    <em>Internal values:</em>
-  <p>
-  <span id="dH" style="text-align: left">dH°: <span>000</span> J/mol; </span>
-  <span id="dS" style="text-align: left">dS°: <span>000</span> J/mol•K; </span>
-  <span id="dG" style="text-align: left">dG°: <span>000</span> J/mol; </span>
-  <span id="Kc" style="text-align: left">Kc°: <span>000</span>; </span>
-  </p>
-  <p>
-  <span id="vol_A" style="text-align: left">vol_A: <span>000</span>; </span>
-  <span id="conc_Ai" style="text-align: left">conc_Ai: <span>000</span>; </span>
-  <span id="vol_B" style="text-align: left">vol_B: <span>000</span>; </span>
-  <span id="conc_Bi" style="text-align: left">conc_Bi: <span>000</span>; </span>
-  <span id="vol_solvent" style="text-align: left">vol_solvent: <span>000</span>; </span>
-  </p>
-  <p>
-  <span id="x_num" style="text-align: left">x_num: <span>000</span>; </span>
-  <span id="conc_Af" style="text-align: left">conc_Af: <span>000</span>; </span>
-  <span id="conc_Bf" style="text-align: left">conc_Bf: <span>000</span>; </span>
-  <span id="conc_Cf" style="text-align: left">conc_Cf: <span>000</span>; </span>
-  </p>
-  <p>
-  <span id="bathTemp_C" style="text-align: left">Bath temp: <span>000</span> °C; </span>
-  <span id="solTemp_C" style="text-align: left">Sol. temp: <span>000</span> °C; </span>
-  </p>
-  </div>
+<div style="color: #cc9900; text-align: left; margin-top: 40px;"">
+  <p>This simulation was designed for use on a laptop or desktop computer. Functions may not operate on a mobile device.</p>
+  <p>Created by Johanna L. Herman, Ph.D. for use in CHEM 134 at the University of Delaware.</p>
 </div>
 
 <script>
@@ -1168,24 +1165,12 @@ var bc = {
   950: 0.00012,
 };
 // Spectrum Plot// Create data array from object bc
+let conc_Af = 0;
 let data = Object.keys(bc).map((w) => ({
   w: Number(w),
   a: conc_Af * bc[w],
 }));
 let selected = { lambda: null, absorbance: null };
-
-function update_dH_display() {
-  document.querySelector('#dH span').textContent = dH.toFixed(0);
-}
-function update_dS_display() {
-  document.querySelector('#dS span').textContent = dS.toFixed(3);
-}
-function update_dG_display() {
-  document.querySelector('#dG span').textContent = dG.toFixed(0);
-}
-update_dH_display();
-update_dS_display();
-update_dG_display();
 
 let solTemp_C = 20; // in °C
 let cKelvin = 273.1; // conversion factor between °C and Kelvin
@@ -1198,8 +1183,10 @@ let vol_solvent = 0; // in mL
 let conc_A0 = 0.01; // in M
 let conc_B0 = 0.01; // in M
 let conc_C = 0; // in M
+document.querySelector('#conc_A0 span').textContent = conc_A0.toExponential(2);
+document.querySelector('#conc_B0 span').textContent = conc_B0.toExponential(2);
 
-function setupSyringe(cylinder, plunger, reading, volumeVar) {
+function setupSyringe(cylinder, plunger, volumeVar) {
   cylinder.addEventListener('click', (e) => {
     const rect = cylinder.getBoundingClientRect();
     const y = e.clientY - rect.top;
@@ -1213,52 +1200,39 @@ function setupSyringe(cylinder, plunger, reading, volumeVar) {
     // Compute the volume
     const volume = (fraction * 1.2).toFixed(2);
 
-    // Update the reading display
-    reading.textContent = `Level: ${volume}`;
-
     // Store in the correct volume variable
     if (volumeVar === 'A') vol_A = parseFloat(volume);
     if (volumeVar === 'B') vol_B = parseFloat(volume);
     if (volumeVar === 'C') vol_solvent = parseFloat(volume);
 
-    const elementSol = document.getElementById('solvent');
-    elementSol.style.height = 75 + '%';
+    if (vol_A + vol_B + vol_solvent > 0) {
+      const elementSol = document.getElementById('solvent');
+      elementSol.style.height = 75 + '%';
+      setCubePosition(positions[0]);
+    }
   });
 }
 
 setupSyringe(
   document.getElementById('cylinder1'),
   document.getElementById('plunger1'),
-  document.getElementById('reading1'),
   'A',
 );
 setupSyringe(
   document.getElementById('cylinder2'),
   document.getElementById('plunger2'),
-  document.getElementById('reading2'),
   'B',
 );
 setupSyringe(
   document.getElementById('cylinder3'),
   document.getElementById('plunger3'),
-  document.getElementById('reading3'),
   'C',
 );
 
 function calcThermoVars() {
   let conc_Ai = (vol_A * conc_A0) / (vol_A + vol_B + vol_solvent);
   let conc_Bi = (vol_B * conc_B0) / (vol_A + vol_B + vol_solvent);
-  document.querySelector('#vol_A span').textContent = vol_A.toFixed(3);
-  document.querySelector('#conc_Ai span').textContent =
-    conc_Ai.toExponential(3);
-  document.querySelector('#vol_B span').textContent = vol_B.toFixed(3);
-  document.querySelector('#conc_Bi span').textContent =
-    conc_Bi.toExponential(3);
-  document.querySelector('#vol_solvent span').textContent =
-    vol_solvent.toFixed(3);
-
   let Kc = Math.exp(dS / cR - dH / (cR * (solTemp_C + cKelvin)));
-  document.querySelector('#Kc span').textContent = Kc.toFixed(2);
 
   // determine x value
   let x_num = 0; //must const outside of function!
@@ -1277,20 +1251,12 @@ function calcThermoVars() {
   } else {
     x_num = 0;
   }
-  document.querySelector('#x_num span').textContent = x_num.toFixed(6);
 
-  let conc_Af;
   let conc_Bf;
   let conc_Cf;
   conc_Af = conc_Ai - x_num;
   conc_Bf = conc_Bi - x_num;
   conc_Cf = 2 * x_num;
-  document.querySelector('#conc_Af span').textContent =
-    conc_Af.toExponential(3);
-  document.querySelector('#conc_Bf span').textContent =
-    conc_Bf.toExponential(3);
-  document.querySelector('#conc_Cf span').textContent =
-    conc_Cf.toExponential(3);
 
   data = Object.keys(bc).map((w) => ({
     w: Number(w),
@@ -1306,7 +1272,6 @@ calcThermoVars();
 // water bath slider (start)
 let bathTemp_C = 25; // in °C
 let iceTemp_C = -10; // in °C
-document.querySelector('#bathTemp_C span').textContent = bathTemp_C.toFixed(1);
 
 const slider = document.getElementById('tempSlider');
 const bubble = document.getElementById('temp-bubble-bath');
@@ -1324,11 +1289,7 @@ function updateBubble() {
 
   // Update external variable
   bathTemp_C = temp;
-  document.querySelector('#bathTemp_C span').textContent =
-    bathTemp_C.toFixed(1);
 }
-
-//slider.addEventListener('input', updateBubble);
 window.addEventListener('DOMContentLoaded', () => {
   // slider.value = bathTemp_C;
   updateBubble();
@@ -1340,14 +1301,14 @@ const tempBubble_cuv = document.getElementById('temp-bubble-cuv');
 tempBubble_cuv.textContent = `${solTemp_C}°C`;
 const container = document.getElementById('simulation-container');
 
-const cubeWidth = 30;
-const cubeHeight = 90;
+const cubeWidth = 26;
+const cubeHeight = 88;
 
 // Define positions (adjust as needed)
 const positions = [
-  { x: 1160, y: 538 }, // start
-  { x: 1035, y: 538 }, // spec
-  { x: 1054, y: 338 }, // ice bath
+  { x: 1160, y: 550 }, // start
+  { x: 1037, y: 553 }, // spec
+  { x: 1054, y: 318 }, // ice bath
   { x: 1359, y: 338 }, // water bath
 ];
 let nearest = positions[0]; // use nearest["x"] OR nearest.x to find current x position
@@ -1378,7 +1339,6 @@ function update_cuvTemp() {
     tempBubble_cuv.textContent = `${bathTemp_C}°C`;
     solTemp_C = bathTemp_C;
   }
-  document.querySelector('#solTemp_C span').textContent = solTemp_C.toFixed(1);
   calcThermoVars();
 }
 
@@ -1600,24 +1560,31 @@ function updateCanvas(evOrW) {
   }
 
   // find nearest data point by wavelength
-  const nearest = data.reduce((prev, cur) =>
+  const nearest_w = data.reduce((prev, cur) =>
     Math.abs(cur.w - w) < Math.abs(prev.w - w) ? cur : prev,
   );
-  selected.lambda = nearest.w;
+  selected.lambda = nearest_w.w;
   lambda = selected.lambda;
-  selected.absorbance = nearest.a;
+  selected.absorbance = nearest_w.a;
   document.getElementById('selLambda').textContent = selected.lambda.toFixed(0);
+
   if (isNaN(selected.absorbance)) {
     document.getElementById('selAbs').textContent = (0).toFixed(3);
+    render();
   } else if (nearest.x == positions[1].x) {
-    document.getElementById('selAbs').textContent = selected.absorbance.toFixed(3);
-    const x = transformX(selected.lambda), y = transformY(selected.absorbance);
+    document.getElementById('selAbs').textContent =
+      selected.absorbance.toFixed(3);
+    render();
+    const x = transformX(selected.lambda),
+      y = transformY(selected.absorbance);
     ctx.fillStyle = '#cc9900';
     ctx.beginPath();
     ctx.arc(x, y, 8, 0, Math.PI * 2);
     ctx.fill();
+  } else {
+    document.getElementById('selAbs').textContent = (0).toFixed(3);
+    render();
   }
-  render();
   drawIndicatorLine(selected.lambda);
 }
 
@@ -1658,7 +1625,23 @@ function openTabs(evt, Sim_part) {
 // Get the element with id="defaultOpen" and click on it
 document.getElementById('defaultOpen').click();
 
-// use tempBubble_cuv.value to get cuvette solution temp
+
+// Reset 
+document.getElementById('resetButton').addEventListener('click', () => {
+  lambda = 950;
+  vol_A = 0; // in mL
+  vol_B = 0; // in mL
+  vol_solvent = 0; // in mL
+  bathTemp_C = 25; // in °C
+  plunger1.style.bottom = `${27}px`;
+  plunger2.style.bottom = `${27}px`;
+  plunger3.style.bottom = `${27}px`;
+  const elementSol = document.getElementById('solvent');
+  elementSol.style.height = 0 + '%';
+  setCubePosition(positions[0]);
+  calcThermoVars();
+  updateCanvas(lambda);
+});
 
 
 </script>
