@@ -16,7 +16,6 @@ body {
 }
 .backend {
   top: 500px;
-  width: 400px;
 }
 
 button {
@@ -236,8 +235,8 @@ canvas {
     cursor: grabbing;
   }
 
-  /* Water inside cube */
-  .water {
+  /* solvent inside cube */
+  .solvent {
     width: 100%;
     height: 0%; /* 2/3 fill */
     background-color: #3399ff;
@@ -331,7 +330,7 @@ canvas {
 .glassware-container-2 {
   margin: auto;
   position: relative;
-  width: 1400px;
+  width: 1000px;
 }
 .syringe {
   position: relative;
@@ -341,7 +340,7 @@ canvas {
 .plunger {
   position: absolute;
   z-index: -10;
-  left: 50%;
+  left: 52%;
   bottom: 27px; /* 36px; */
   width: 120%;
   transform: translateX(-50%);
@@ -415,7 +414,6 @@ canvas {
   pointer-events: none;
 }
 
-
   </style>
 </head>
 <body>
@@ -459,7 +457,7 @@ canvas {
   <!-- Simulation overlay container -->
   <div id="simulation-container">
     <div class="cube" id="cube">
-      <div class="water"></div>
+      <div class="solvent" id="solvent"></div>
     </div>
     <div id="temp-bubble-cuv">20°C</div>
   </div>
@@ -472,7 +470,7 @@ canvas {
         <div class="column2">
           <div class="container" id="cylinder1">
             <div class="solution" id="solution1"></div>
-            <div class="reading" id="reading1">Level: 0.00</div>
+            <div class="reading" id="reading1">Level: <span>0.00</span></div>
             <img
               class="syringe"
               id="syringe1"
@@ -548,7 +546,7 @@ canvas {
     </div>
 
     <div class="tab" style="margin: 140px 10px 10px 10px;">
-    <button class="tablinks" onclick="openTabs(event, 'Tab1');" id="defaultOpen">Combine measured reagent amounts in cuvette!</button>
+    <button class="tablinks" id="defaultOpen" onclick="openTabs(event, 'Tab1'); calcThermoVars();">Combine measured reagent amounts in cuvette!</button>
   </div>
 
 </div>
@@ -564,10 +562,10 @@ canvas {
   <div style="color: blue; text-align: left">
     <em>Internal values:</em>
   <p>
-  <span id="dH" style="text-align: left">dH: <span>000</span> J; </span>
-  <span id="dS" style="text-align: left">dS: <span>000</span> J/K; </span>
-  <span id="dG" style="text-align: left">dG: <span>000</span> J; </span>
-  <span id="Kc" style="text-align: left">Kc: <span>000</span>; </span>
+  <span id="dH" style="text-align: left">dH°: <span>000</span> J/mol; </span>
+  <span id="dS" style="text-align: left">dS°: <span>000</span> J/mol•K; </span>
+  <span id="dG" style="text-align: left">dG°: <span>000</span> J/mol; </span>
+  <span id="Kc" style="text-align: left">Kc°: <span>000</span>; </span>
   </p>
   <p>
   <span id="vol_A" style="text-align: left">vol_A: <span>000</span>; </span>
@@ -583,7 +581,8 @@ canvas {
   <span id="conc_Cf" style="text-align: left">conc_Cf: <span>000</span>; </span>
   </p>
   <p>
-  <span id="bathTemp_C" style="text-align: left">bathTemp_C: <span>000</span> °C; </span>
+  <span id="bathTemp_C" style="text-align: left">Bath temp: <span>000</span> °C; </span>
+  <span id="solTemp_C" style="text-align: left">Sol. temp: <span>000</span> °C; </span>
   </p>
   </div>
 </div>
@@ -592,126 +591,8 @@ canvas {
 let cR = 8.314; // ideal gas constant
 let dH = -11190;
 let dS = 5.141;
-let dG = -12723;
-
-function update_dH_display() {
-  document.querySelector('#dH span').textContent = dH.toFixed(0);
-}
-function update_dS_display() {
-  document.querySelector('#dS span').textContent = dS.toFixed(3);
-}
-function update_dG_display() {
-  document.querySelector('#dG span').textContent = dG.toFixed(0);
-}
-update_dH_display();
-update_dS_display();
-update_dG_display();
-
-let rxnA = 1;
-let rxnB = 1;
-let rxnC = 2;
-
-let solTemp_C = 20; // in °C
-let cKelvin = 273.1; // conversion factor between °C and Kelvin
-let solTemp_K = solTemp_C + cKelvin;
-
-// tab 2 start //
-let vol_A = 3; // in mL
-let vol_B = 3; // in mL
-let vol_solvent = 0; // in mL
-
-let conc_A0 = 0.01; // in M
-let conc_B0 = 0.01; // in M
-let conc_C = 0; // in M
-
-let conc_Ai = (vol_A * conc_A0) / (vol_A + vol_B + vol_solvent);
-let conc_Bi = (vol_B * conc_B0) / (vol_A + vol_B + vol_solvent);
-
-function update_conc_displays() {
-  document.querySelector('#conc_A0 span').textContent =
-    conc_A0.toExponential(2) + ' M';
-  document.querySelector('#conc_B0 span').textContent =
-    conc_B0.toExponential(2) + ' M';
-}
-update_conc_displays();
-
-function setupSyringe(cylinder, plunger, reading) {
-  cylinder.addEventListener('click', (e) => {
-    const rect = cylinder.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    const height = rect.height;
-    const fraction = Math.max(0, Math.min(1, 0.91 - y / height));
-    const percent = fraction * 100;
-
-    // Adjust the plunger position
-    plunger.style.bottom = `${percent + 9}%`;
-
-    // Update the reading display
-    reading.textContent = `Level: ${(fraction * 1.2).toFixed(2)}`;
-  });
-}
-
-setupSyringe(
-  document.getElementById('cylinder1'),
-  document.getElementById('plunger1'),
-  document.getElementById('reading1'),
-);
-setupSyringe(
-  document.getElementById('cylinder2'),
-  document.getElementById('plunger2'),
-  document.getElementById('reading2'),
-);
-setupSyringe(
-  document.getElementById('cylinder3'),
-  document.getElementById('plunger3'),
-  document.getElementById('reading3'),
-);
-
-// tab 2 end //
-
-// tab 1 start //
-// Set Kc
-let Kc = Math.exp(dS / cR - dH / (cR * solTemp_K));
-function update_Kc_display() {
-  document.querySelector('#Kc span').textContent = Kc.toFixed(2);
-}
-update_Kc_display();
-
-function update_conc_displays() {
-  document.querySelector('#vol_A span').textContent = vol_A.toFixed(3);
-  document.querySelector('#conc_Ai span').textContent =
-    conc_Ai.toExponential(3);
-  document.querySelector('#vol_B span').textContent = vol_B.toFixed(3);
-  document.querySelector('#conc_Bi span').textContent =
-    conc_Bi.toExponential(3);
-}
-update_conc_displays();
-
-// determine x value
-let x_num = 0; //must const outside of function!
-const a = conc_Ai;
-const b = conc_Bi;
-const k = Kc;
-
-const D = Math.pow(k, 2) * Math.pow(a + b, 2) + 4 * k * (4 - k) * a * b;
-const m_num = (-k * (a + b) + Math.sqrt(D)) / (2 * (4 - k));
-const n_num = (-k * (a + b) - Math.sqrt(D)) / (2 * (4 - k));
-
-if (m_num > 0 && m_num < Math.max(a, b)) {
-  x_num = m_num;
-} else if (n_num > 0 && n_num < Math.max(a, b)) {
-  x_num = n_num;
-} else {
-  x_num = 0;
-}
-document.querySelector('#x_num span').textContent = x_num.toFixed(6);
-
-const conc_Af = conc_Ai - x_num;
-const conc_Bf = conc_Bi - x_num;
-const conc_Cf = 2 * x_num;
-document.querySelector('#conc_Af span').textContent = conc_Af.toExponential(3);
-document.querySelector('#conc_Bf span').textContent = conc_Bf.toExponential(3);
-document.querySelector('#conc_Cf span').textContent = conc_Cf.toExponential(3);
+let dG = dH - 298.15 * dS;
+let lambda = 950;
 
 var bc = {
   380: 4.47501,
@@ -1286,7 +1167,6 @@ var bc = {
   949: 0.00013,
   950: 0.00012,
 };
-
 // Spectrum Plot// Create data array from object bc
 let data = Object.keys(bc).map((w) => ({
   w: Number(w),
@@ -1294,149 +1174,134 @@ let data = Object.keys(bc).map((w) => ({
 }));
 let selected = { lambda: null, absorbance: null };
 
-const canvas = document.getElementById('plotCanvas');
-const ctx = canvas.getContext('2d');
-const margin = { l: 100, r: 50, t: 24, b: 100 };
-let xMin = 380,
-  xMax = 930,
-  yMin = 0,
-  yMax = 1;
-
-function transformX(w) {
-  return (
-    margin.l +
-    ((w - xMin) / (xMax - xMin)) * (canvas.width - margin.l - margin.r)
-  );
+function update_dH_display() {
+  document.querySelector('#dH span').textContent = dH.toFixed(0);
 }
-function transformY(a) {
-  return (
-    margin.t +
-    (1 - (a - yMin) / (yMax - yMin)) * (canvas.height - margin.t - margin.b)
-  );
+function update_dS_display() {
+  document.querySelector('#dS span').textContent = dS.toFixed(3);
 }
-function clearCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+function update_dG_display() {
+  document.querySelector('#dG span').textContent = dG.toFixed(0);
+}
+update_dH_display();
+update_dS_display();
+update_dG_display();
+
+let solTemp_C = 20; // in °C
+let cKelvin = 273.1; // conversion factor between °C and Kelvin
+
+// tab 2 start //
+let vol_A = 0; // in mL
+let vol_B = 0; // in mL
+let vol_solvent = 0; // in mL
+
+let conc_A0 = 0.01; // in M
+let conc_B0 = 0.01; // in M
+let conc_C = 0; // in M
+
+function setupSyringe(cylinder, plunger, reading, volumeVar) {
+  cylinder.addEventListener('click', (e) => {
+    const rect = cylinder.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const height = rect.height;
+    const fraction = Math.max(0, Math.min(1, 0.91 - y / height));
+    const percent = fraction * 100;
+
+    // Adjust the plunger position
+    plunger.style.bottom = `${percent + 9}%`;
+
+    // Compute the volume
+    const volume = (fraction * 1.2).toFixed(2);
+
+    // Update the reading display
+    reading.textContent = `Level: ${volume}`;
+
+    // Store in the correct volume variable
+    if (volumeVar === 'A') vol_A = parseFloat(volume);
+    if (volumeVar === 'B') vol_B = parseFloat(volume);
+    if (volumeVar === 'C') vol_solvent = parseFloat(volume);
+
+    const elementSol = document.getElementById('solvent');
+    elementSol.style.height = 75 + '%';
+  });
 }
 
-function drawAxes() {
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(
-    margin.l,
-    margin.t,
-    canvas.width - margin.l - margin.r,
-    canvas.height - margin.t - margin.b,
-  );
-  ctx.strokeStyle = 'lightgray';
-  ctx.lineWidth = 1;
-  ctx.font = '16px Arial';
-  ctx.fillStyle = '#000';
+setupSyringe(
+  document.getElementById('cylinder1'),
+  document.getElementById('plunger1'),
+  document.getElementById('reading1'),
+  'A',
+);
+setupSyringe(
+  document.getElementById('cylinder2'),
+  document.getElementById('plunger2'),
+  document.getElementById('reading2'),
+  'B',
+);
+setupSyringe(
+  document.getElementById('cylinder3'),
+  document.getElementById('plunger3'),
+  document.getElementById('reading3'),
+  'C',
+);
 
-  // x ticks
-  const xTicks = 5;
-  for (let i = 0; i <= xTicks; i++) {
-    const t = xMin + ((xMax - xMin) * i) / xTicks;
-    const x = transformX(t);
-    ctx.font = '16px Arial';
-    ctx.beginPath();
-    ctx.moveTo(x, margin.t);
-    ctx.lineTo(x, canvas.height - margin.b);
-    ctx.stroke();
-    ctx.fillText(Math.round(t) + ' nm', x - 18, canvas.height - margin.b + 32);
+function calcThermoVars() {
+  let conc_Ai = (vol_A * conc_A0) / (vol_A + vol_B + vol_solvent);
+  let conc_Bi = (vol_B * conc_B0) / (vol_A + vol_B + vol_solvent);
+  document.querySelector('#vol_A span').textContent = vol_A.toFixed(3);
+  document.querySelector('#conc_Ai span').textContent =
+    conc_Ai.toExponential(3);
+  document.querySelector('#vol_B span').textContent = vol_B.toFixed(3);
+  document.querySelector('#conc_Bi span').textContent =
+    conc_Bi.toExponential(3);
+  document.querySelector('#vol_solvent span').textContent =
+    vol_solvent.toFixed(3);
+
+  let Kc = Math.exp(dS / cR - dH / (cR * (solTemp_C + cKelvin)));
+  document.querySelector('#Kc span').textContent = Kc.toFixed(2);
+
+  // determine x value
+  let x_num = 0; //must const outside of function!
+  const a = conc_Ai;
+  const b = conc_Bi;
+  const k = Kc;
+
+  const D = Math.pow(k, 2) * Math.pow(a + b, 2) + 4 * k * (4 - k) * a * b;
+  const m_num = (-k * (a + b) + Math.sqrt(D)) / (2 * (4 - k));
+  const n_num = (-k * (a + b) - Math.sqrt(D)) / (2 * (4 - k));
+
+  if (m_num > 0 && m_num < Math.max(a, b)) {
+    x_num = m_num;
+  } else if (n_num > 0 && n_num < Math.max(a, b)) {
+    x_num = n_num;
+  } else {
+    x_num = 0;
   }
+  document.querySelector('#x_num span').textContent = x_num.toFixed(6);
 
-  // y ticks
-  const yTicks = 5;
-  for (let i = 0; i <= yTicks; i++) {
-    const a = yMin + ((yMax - yMin) * i) / yTicks;
-    const y = transformY(a);
-    ctx.beginPath();
-    ctx.moveTo(margin.l, y);
-    ctx.lineTo(canvas.width - margin.r, y);
-    ctx.stroke();
-    ctx.fillText(a.toFixed(1), 70, y + 4);
-  }
+  let conc_Af;
+  let conc_Bf;
+  let conc_Cf;
+  conc_Af = conc_Ai - x_num;
+  conc_Bf = conc_Bi - x_num;
+  conc_Cf = 2 * x_num;
+  document.querySelector('#conc_Af span').textContent =
+    conc_Af.toExponential(3);
+  document.querySelector('#conc_Bf span').textContent =
+    conc_Bf.toExponential(3);
+  document.querySelector('#conc_Cf span').textContent =
+    conc_Cf.toExponential(3);
 
-  ctx.save();
-  ctx.font = '24px Arial';
-  ctx.translate(margin.l / 2, canvas.height / 2 + 20);
-  ctx.rotate(-Math.PI / 2);
-  ctx.fillText('Absorbance', 0, -20);
-  ctx.restore();
-  ctx.font = '24px Arial';
-  ctx.fillText(
-    'Wavelength (nm)',
-    canvas.width / 2 - 40,
-    canvas.height - margin.b + 75,
-  );
+  data = Object.keys(bc).map((w) => ({
+    w: Number(w),
+    a: conc_Af * bc[w],
+  }));
 }
+calcThermoVars();
 
-function drawSpectrum(data) {
-  ctx.strokeStyle = '#000';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  for (let i = 0; i < data.length; i++) {
-    const p = data[i];
-    const x = transformX(p.w);
-    const y = transformY(p.a);
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.stroke();
-}
+// tab 2 end //
 
-function render() {
-  clearCanvas();
-  drawAxes();
-  drawSpectrum(data);
-}
-
-function drawIndicatorLine(lambda) {
-  const x = transformX(lambda);
-  ctx.strokeStyle = '#cc9900';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([5, 5]);
-  ctx.beginPath();
-  ctx.moveTo(x, margin.t);
-  ctx.lineTo(x, canvas.height - margin.b);
-  ctx.stroke();
-  ctx.setLineDash([]);
-}
-
-canvas.addEventListener('click', (ev) => {
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const mx = (ev.clientX - rect.left) * scaleX;
-  const W = canvas.width - margin.l - margin.r;
-  const frac = (mx - margin.l) / W;
-  const w = xMin + frac * (xMax - xMin);
-  let nearest = data.reduce((prev, cur) =>
-    Math.abs(cur.w - w) < Math.abs(prev.w - w) ? cur : prev,
-  );
-  selected.lambda = nearest.w;
-  selected.absorbance = nearest.a;
-  document.getElementById('selLambda').textContent = selected.lambda.toFixed(0);
-  document.getElementById('selAbs').textContent =
-    selected.absorbance.toFixed(3);
-  render();
-  const x = transformX(selected.lambda),
-    y = transformY(selected.absorbance);
-  ctx.fillStyle = '#cc9900';
-  ctx.beginPath();
-  ctx.arc(x, y, 8, 0, Math.PI * 2);
-  ctx.fill();
-  drawIndicatorLine(selected.lambda);
-});
-
-window.getSelectedWavelength = () => selected.lambda;
-window.getSelectedAbsorbance = () => selected.absorbance;
-
-(function init() {
-  xMin = Math.min(...data.map((p) => p.w));
-  xMax = Math.max(...data.map((p) => p.w));
-  yMin = 0;
-  yMax = 1;
-  render();
-})();
+// tab 1 start //
 
 // water bath slider (start)
 let bathTemp_C = 25; // in °C
@@ -1459,12 +1324,13 @@ function updateBubble() {
 
   // Update external variable
   bathTemp_C = temp;
-  document.querySelector('#bathTemp_C span').textContent = bathTemp_C.toFixed(1);
+  document.querySelector('#bathTemp_C span').textContent =
+    bathTemp_C.toFixed(1);
 }
 
-slider.addEventListener('input', updateBubble);
+//slider.addEventListener('input', updateBubble);
 window.addEventListener('DOMContentLoaded', () => {
-  slider.value = bathTemp_C;
+  // slider.value = bathTemp_C;
   updateBubble();
 });
 
@@ -1507,9 +1373,13 @@ positions.forEach((pos) => {
 function update_cuvTemp() {
   if (nearest.x == positions[2].x) {
     tempBubble_cuv.textContent = `${iceTemp_C}°C`;
+    solTemp_C = iceTemp_C;
   } else if (nearest.x == positions[3].x) {
     tempBubble_cuv.textContent = `${bathTemp_C}°C`;
+    solTemp_C = bathTemp_C;
   }
+  document.querySelector('#solTemp_C span').textContent = solTemp_C.toFixed(1);
+  calcThermoVars();
 }
 
 function setCubePosition(pos) {
@@ -1588,6 +1458,7 @@ document.addEventListener('mouseup', () => {
     });
 
     setCubePosition(nearest);
+    updateCanvas(lambda);
   }
 });
 
@@ -1596,11 +1467,170 @@ function distance(x1, y1, x2, y2) {
 }
 
 // Update temperature dynamically
- tempSlider.addEventListener('input', () => {
-    if (nearest.x == positions[3].x) {
-      tempBubble_cuv.textContent = `${tempSlider.value}°C`;
-    }
- });
+tempSlider.addEventListener('input', () => {
+  updateBubble();
+  update_cuvTemp();
+});
+
+const canvas = document.getElementById('plotCanvas');
+const ctx = canvas.getContext('2d');
+const margin = { l: 100, r: 50, t: 24, b: 100 };
+let xMin = 380,
+  xMax = 930,
+  yMin = 0,
+  yMax = 1;
+
+function transformX(w) {
+  return (
+    margin.l +
+    ((w - xMin) / (xMax - xMin)) * (canvas.width - margin.l - margin.r)
+  );
+}
+function transformY(a) {
+  return (
+    margin.t +
+    (1 - (a - yMin) / (yMax - yMin)) * (canvas.height - margin.t - margin.b)
+  );
+}
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+function drawAxes() {
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(
+    margin.l,
+    margin.t,
+    canvas.width - margin.l - margin.r,
+    canvas.height - margin.t - margin.b,
+  );
+  ctx.strokeStyle = 'lightgray';
+  ctx.lineWidth = 1;
+  ctx.font = '16px Arial';
+  ctx.fillStyle = '#000';
+
+  // x ticks
+  const xTicks = 6;
+  for (let i = 0; i <= xTicks; i++) {
+    const t = xMin + ((xMax - xMin) * i) / xTicks;
+    const x = transformX(t);
+    ctx.font = '16px Arial';
+    ctx.beginPath();
+    ctx.moveTo(x, margin.t);
+    ctx.lineTo(x, canvas.height - margin.b);
+    ctx.stroke();
+    ctx.fillText(Math.round(t) + ' nm', x - 18, canvas.height - margin.b + 32);
+  }
+
+  // y ticks
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const a = yMin + ((yMax - yMin) * i) / yTicks;
+    const y = transformY(a);
+    ctx.beginPath();
+    ctx.moveTo(margin.l, y);
+    ctx.lineTo(canvas.width - margin.r, y);
+    ctx.stroke();
+    ctx.fillText(a.toFixed(1), 70, y + 4);
+  }
+
+  ctx.save();
+  ctx.font = '24px Arial';
+  ctx.translate(margin.l / 2, canvas.height / 2 + 20);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('Absorbance', 0, -20);
+  ctx.restore();
+  ctx.font = '24px Arial';
+  ctx.fillText(
+    'Wavelength (nm)',
+    canvas.width / 2 - 40,
+    canvas.height - margin.b + 75,
+  );
+}
+function drawSpectrum(data) {
+  if (nearest.x != positions[1].x) return; // only draw if cuvette is in spec position
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < data.length; i++) {
+    const p = data[i];
+    const x = transformX(p.w);
+    const y = transformY(p.a);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+function drawIndicatorLine(lambda) {
+  const x = transformX(lambda);
+  ctx.strokeStyle = '#cc9900';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(x, margin.t);
+  ctx.lineTo(x, canvas.height - margin.b);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+function render() {
+  clearCanvas();
+  drawAxes();
+  drawSpectrum(data);
+}
+
+canvas.addEventListener('click', updateCanvas);
+function updateCanvas(evOrW) {
+  let w;
+
+  if (typeof evOrW === 'number') {
+    // direct wavelength passed in
+    w = evOrW;
+  } else if (evOrW && evOrW.clientX !== undefined) {
+    // Mouse event
+    const ev = evOrW;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const mx = (ev.clientX - rect.left) * scaleX;
+    const W = canvas.width - margin.l - margin.r;
+    const frac = (mx - margin.l) / W;
+    w = xMin + frac * (xMax - xMin);
+  } else {
+    // nothing valid passed: just re-render
+    render();
+    return;
+  }
+
+  // find nearest data point by wavelength
+  const nearest = data.reduce((prev, cur) =>
+    Math.abs(cur.w - w) < Math.abs(prev.w - w) ? cur : prev,
+  );
+  selected.lambda = nearest.w;
+  lambda = selected.lambda;
+  selected.absorbance = nearest.a;
+  document.getElementById('selLambda').textContent = selected.lambda.toFixed(0);
+  if (isNaN(selected.absorbance)) {
+    document.getElementById('selAbs').textContent = (0).toFixed(3);
+  } else if (nearest.x == positions[1].x) {
+    document.getElementById('selAbs').textContent = selected.absorbance.toFixed(3);
+    const x = transformX(selected.lambda), y = transformY(selected.absorbance);
+    ctx.fillStyle = '#cc9900';
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  render();
+  drawIndicatorLine(selected.lambda);
+}
+
+window.getSelectedWavelength = () => selected.lambda;
+window.getSelectedAbsorbance = () => selected.absorbance;
+
+(function init() {
+  xMin = Math.min(...data.map((p) => p.w));
+  xMax = Math.max(...data.map((p) => p.w));
+  yMin = 0;
+  yMax = 1;
+  render();
+})();
 
 // end tab 2 //
 
@@ -1627,7 +1657,6 @@ function openTabs(evt, Sim_part) {
 
 // Get the element with id="defaultOpen" and click on it
 document.getElementById('defaultOpen').click();
-
 
 // use tempBubble_cuv.value to get cuvette solution temp
 
