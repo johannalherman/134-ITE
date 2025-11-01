@@ -1633,6 +1633,8 @@ document.getElementById('resetButton').addEventListener('click', () => {
   vol_B = 0; // in mL
   vol_solvent = 0; // in mL
   bathTemp_C = 25; // in °C
+  slider.value = bathTemp_C;
+  updateBubble();
   plunger1.style.bottom = `${27}px`;
   plunger2.style.bottom = `${27}px`;
   plunger3.style.bottom = `${27}px`;
