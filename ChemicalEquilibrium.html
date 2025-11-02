@@ -1176,6 +1176,7 @@ let data = Object.keys(bc).map((w) => ({
 }));
 let selected = { lambda: null, absorbance: null };
 
+
 let solTemp_C = 20; // in °C
 let cKelvin = 273.1; // conversion factor between °C and Kelvin
 
@@ -1211,18 +1212,10 @@ function setupSyringe(cylinder, plunger, volumeVar) {
     if (volumeVar === 'B') vol_B = parseFloat(volume);
     if (volumeVar === 'C') vol_solvent = parseFloat(volume);
     const vol_T = vol_A + vol_B + vol_solvent;
-    concRatio = vol_A / vol_T;
 
     if (vol_A + vol_B + vol_solvent > 0) {
       const elementSol = document.getElementById('solvent');
       elementSol.style.height = 75 + '%';
-      if (vol_A > 0) {
-        elementSol.style.background = solColor;
-        elementSol.style.opacity = 0.5 * concRatio;
-      } else {
-        elementSol.style.background = '#abdcf2';
-        elementSol.style.opacity = 0.5;
-      }
     }
     setCubePosition(positions[0]);
     solTemp_C = 20;
@@ -1279,6 +1272,16 @@ function calcThermoVars() {
     w: Number(w),
     a: conc_Af * bc[w],
   }));
+
+  const elementSol = document.getElementById('solvent');
+  if (conc_Af > 0) {
+    concRatio = conc_Af / conc_A0;
+    elementSol.style.background = solColor;
+    elementSol.style.opacity = 0.5 * concRatio * 5;
+  } else {
+    elementSol.style.background = '#abdcf2';
+    elementSol.style.opacity = 0.5;
+  }
 }
 calcThermoVars();
 
@@ -1675,6 +1678,7 @@ document.getElementById('resetButton').addEventListener('click', () => {
   document.getElementById('selLambda').textContent = '---';
   document.getElementById('selAbs').textContent = '-.---';
 });
+
 
 
 </script>
