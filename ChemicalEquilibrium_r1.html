@@ -320,8 +320,8 @@ canvas {
   z-index: 1000;
   left: 50%;
   top: 50%;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   border: 2px solid #cc9900;
   border-radius: 50%;
   transform: translate(-50%, -50%) scale(0);
@@ -452,6 +452,7 @@ canvas {
   pointer-events: none;
 }
 
+
   </style>
 </head>
 <body>
@@ -520,7 +521,7 @@ canvas {
             <img
               class="syringe"
               id="syringe1"
-              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
+              src="https://github.com/johannalherman/134-ITE/blob/main/3.0-mL%20syringe.png?raw=true"
             />
             <img
               class="plunger"
@@ -544,7 +545,7 @@ canvas {
             <img
               class="syringe"
               id="syringe2"
-              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
+              src="https://github.com/johannalherman/134-ITE/blob/main/3.0-mL%20syringe.png?raw=true"
             />
             <img
               class="plunger"
@@ -568,7 +569,7 @@ canvas {
             <img
               class="syringe"
               id="syringe3"
-              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe.png?raw=true"
+              src="https://github.com/johannalherman/134-ITE/blob/main/3.0-mL%20syringe.png?raw=true"
             />
             <img
               class="plunger"
@@ -1185,8 +1186,8 @@ let vol_A = 0; // in mL
 let vol_B = 0; // in mL
 let vol_solvent = 0; // in mL
 let concRatio = 0;
-document.querySelector('#conc_A0 span').textContent = conc_A0.toExponential(3);
-document.querySelector('#conc_B0 span').textContent = conc_B0.toExponential(3);
+document.querySelector('#conc_A0 span').textContent = conc_A0.toExponential(3) + " M";
+document.querySelector('#conc_B0 span').textContent = conc_B0.toExponential(3) + " M";
 
 const solution1 = document.getElementById('solution1');
 solution1.style.background = solColor;
@@ -1205,7 +1206,7 @@ function setupSyringe(cylinder, plunger, volumeVar) {
     plunger.style.bottom = `${percent + 9}%`;
 
     // Compute the volume
-    const volume = (fraction * 1.2).toFixed(2);
+    const volume = (fraction * 3.7037).toFixed(2);
 
     // Store in the correct volume variable
     if (volumeVar === 'A') vol_A = parseFloat(volume);
@@ -1667,7 +1668,8 @@ function resetSyringes() {
 }
 
 // Reset
-document.getElementById('resetButton').addEventListener('click', () => {
+resetButton.addEventListener('click', resetAll);
+function resetAll() {
   resetCuvette();
   bathTemp_C = 20; // in °C
   slider.value = bathTemp_C;
@@ -1677,7 +1679,9 @@ document.getElementById('resetButton').addEventListener('click', () => {
   updateCanvas(lambda);
   document.getElementById('selLambda').textContent = '---';
   document.getElementById('selAbs').textContent = '-.---';
-});
+}
+resetAll();
+
 
 
 
