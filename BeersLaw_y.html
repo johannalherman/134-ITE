@@ -6,7 +6,7 @@
   <title>Chemical Equilibrium</title>
   <style>
 body {
-  width: 1500px;
+  width: 1000px;
   margin: auto;
   font:
     18px Arial,
@@ -111,7 +111,7 @@ button {
 
 .glassware-container-1 {
   position: relative;
-  width: 1400px;
+  width: 1000px;
   margin: auto;
 }
 .benchtop {
@@ -133,7 +133,7 @@ button {
   position: absolute;
   z-index: 100;
   bottom: 2px;
-  left: 732px;
+  left: 726.5px;
   width: 283px;
   pointer-events: none; /* allows clicks to go through transparent image */
 }
@@ -369,12 +369,13 @@ canvas {
 
 
 
+
   </style>
 </head>
 <body>
   
 <div id="Tab1" class="tabcontent">
-    <div class="tab" style="position: absolute; right: 70px; bottom: 100px; z-index: 100;">
+    <div class="tab" style="position: absolute; right: 70px; bottom: 250px; z-index: 100;">
       <button class="tablinks" onclick="openTabs(event, 'Tab2'); resetSyringes(); resetCuvette(); findAbs(); updateCanvas(lambda);">Prepare dilution!</button>
     </div>
   <button id="resetButton" class="control-button" style="font-size: 22px; position: absolute; right: 40px; top: 40px; z-index: 100;">Reset All Controls</button>
@@ -1052,7 +1053,7 @@ let conc_Ai = 0;
 let vol_A = 0; // in mL
 let vol_solvent = 0.0001; // in mL
 let concRatio = 0;
-document.querySelector('#conc_A0 span').textContent = conc_A0.toExponential(3);
+document.querySelector('#conc_A0 span').textContent = conc_A0.toExponential(3) + " M";
 
 const solution1 = document.getElementById('solution1');
 solution1.style.background = solColor;
@@ -1137,8 +1138,8 @@ const cubeHeight = 88;
 
 // Define positions (adjust as needed)
 const positions = [
-  { x: 1160, y: 550 }, // start
-  { x: 1031, y: 528 }, // spec
+  { x: 900, y: 300 }, // start
+  { x: 975, y: 528 }, // spec
 ];
 let nearest = positions[0]; // use nearest["x"] OR nearest.x to find current x position
 let markers = [];
@@ -1456,10 +1457,6 @@ function resetAll() {
   document.getElementById('selAbs').textContent = '-.---';
 }
 resetAll();
-
-
-
-
 
 
 </script>
