@@ -368,13 +368,14 @@ canvas {
 }
 
 
+
   </style>
 </head>
 <body>
   
 <div id="Tab1" class="tabcontent">
     <div class="tab" style="position: absolute; right: 70px; bottom: 100px; z-index: 100;">
-      <button class="tablinks" onclick="openTabs(event, 'Tab2'); resetSyringes(); resetCuvette(); updateCanvas(lambda);">Prepare dilution!</button>
+      <button class="tablinks" onclick="openTabs(event, 'Tab2'); resetSyringes(); resetCuvette(); findAbs(); updateCanvas(lambda);">Prepare dilution!</button>
     </div>
   <button id="resetButton" class="control-button" style="font-size: 22px; position: absolute; right: 40px; top: 40px; z-index: 100;">Reset All Controls</button>
   <div class="glassware-container-1">
@@ -473,7 +474,7 @@ canvas {
     </div>
 
     <div class="tab" style="margin: 140px 10px 10px 10px;">
-    <button class="tablinks" id="defaultOpen" onclick="openTabs(event, 'Tab1');">Combine measured reagent amounts in cuvette!</button>
+    <button class="tablinks" id="defaultOpen" onclick="openTabs(event, 'Tab1'); findAbs();">Combine measured reagent amounts in cuvette!</button>
   </div>
 
 </div>
@@ -1047,16 +1048,9 @@ var bc = {
 let conc_A0 = 0.0015; // in M
 let conc_Ai = 0;
 
-// Spectrum Plot// Create data array from object bc
-let data = Object.keys(bc).map((w) => ({
-  w: Number(w),
-  a: conc_Ai * bc[w],
-}));
-let selected = { lambda: null, absorbance: null };
-
 // tab 2 start //
 let vol_A = 0; // in mL
-let vol_solvent = 0; // in mL
+let vol_solvent = 0.0001; // in mL
 let concRatio = 0;
 document.querySelector('#conc_A0 span').textContent = conc_A0.toExponential(3);
 
@@ -1064,6 +1058,22 @@ const solution1 = document.getElementById('solution1');
 solution1.style.background = solColor;
 const beaker_solution1 = document.getElementById('beaker_solution1');
 beaker_solution1.style.background = solColor;
+
+function calcAi() {
+  conc_Ai = (vol_A * conc_A0) / (vol_A + vol_solvent);  
+}
+
+
+// Spectrum Plot// Create data array from object bc
+function findAbs() {
+  calcAi();
+  data = Object.keys(bc).map((w) => ({
+    w: Number(w),
+    a: conc_Ai * bc[w],
+  }));  
+}
+findAbs();
+let selected = { lambda: null, absorbance: null };
 
 function setupSyringe(cylinder, plunger, volumeVar) {
   cylinder.addEventListener('click', (e) => {
@@ -1083,17 +1093,14 @@ function setupSyringe(cylinder, plunger, volumeVar) {
     if (volumeVar === 'A') vol_A = parseFloat(volume);
     if (volumeVar === 'C') vol_solvent = parseFloat(volume);
 
-    conc_Ai = (vol_A * conc_A0) / (vol_A + vol_solvent);
+    calcAi();
 
     if (vol_A + vol_solvent > 0) {
       const elementSol = document.getElementById('solvent');
       elementSol.style.height = 75 + '%';
     }
 
-    data = Object.keys(bc).map((w) => ({
-      w: Number(w),
-      a: conc_Ai * bc[w],
-    }));
+    findAbs();
 
     const elementSol = document.getElementById('solvent');
     if (conc_Ai > 0) {
@@ -1421,6 +1428,7 @@ function openTabs(evt, Sim_part) {
 // Get the element with id="defaultOpen" and click on it
 document.getElementById('defaultOpen').click();
 
+
 // rest cyvette
 function resetCuvette() {
   const elementSol = document.getElementById('solvent');
@@ -1431,20 +1439,25 @@ function resetCuvette() {
 // reset syringes
 function resetSyringes() {
   vol_A = 0; // in mL
-  vol_solvent = 0; // in mL
+  vol_solvent = 0.0001; // in mL
   plunger1.style.bottom = `${27}px`;
   plunger3.style.bottom = `${27}px`;
 }
 
 // Reset
-document.getElementById('resetButton').addEventListener('click', () => {
+resetButton.addEventListener('click', resetAll);
+function resetAll() {
   resetCuvette();
   resetSyringes();
+  findAbs();
   lambda = 0;
   updateCanvas(lambda);
   document.getElementById('selLambda').textContent = '---';
   document.getElementById('selAbs').textContent = '-.---';
-});
+}
+resetAll();
+
+
 
 
 
