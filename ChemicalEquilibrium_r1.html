@@ -6,7 +6,7 @@
   <title>Chemical Equilibrium</title>
   <style>
 body {
-  width: 1500px;
+  width: 1400px;
   margin: auto;
   font:
     18px Arial,
@@ -453,13 +453,14 @@ canvas {
 }
 
 
+
   </style>
 </head>
 <body>
   
 <div id="Tab1" class="tabcontent">
-    <div class="tab" style="position: absolute; right: 70px; bottom: 100px; z-index: 100;">
-      <button class="tablinks" onclick="openTabs(event, 'Tab2'); resetSyringes(); resetCuvette(); updateCanvas(lambda);">Prepare reaction mixture!</button>
+    <div class="tab" style="position: absolute; right: 120px; bottom: 30px; z-index: 100;">
+      <button class="tablinks" onclick="openTabs(event, 'Tab2'); resetSyringes(); resetCuvette(); updateCanvas(lambda);">Prepare cuvette!</button>
     </div>
   <button id="resetButton" class="control-button" style="font-size: 22px; position: absolute; right: 40px; top: 40px; z-index: 100;">Reset All Controls</button>
   <div class="glassware-container-1">
@@ -1327,10 +1328,10 @@ const cubeHeight = 88;
 
 // Define positions (adjust as needed)
 const positions = [
-  { x: 1160, y: 550 }, // start
-  { x: 1037, y: 553 }, // spec
-  { x: 1054, y: 318 }, // ice bath
-  { x: 1359, y: 338 }, // water bath
+  { x: 1100, y: 600 }, // start
+  { x: 987, y: 553 }, // spec
+  { x: 1004, y: 318 }, // ice bath
+  { x: 1309, y: 338 }, // water bath
 ];
 let nearest = positions[0]; // use nearest["x"] OR nearest.x to find current x position
 let markers = [];
@@ -1681,8 +1682,6 @@ function resetAll() {
   document.getElementById('selAbs').textContent = '-.---';
 }
 resetAll();
-
-
 
 
 </script>
