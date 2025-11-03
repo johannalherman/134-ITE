@@ -1375,7 +1375,7 @@ function updateCanvas(evOrW) {
   if (isNaN(selected.absorbance)) {
     document.getElementById('selAbs').textContent = (0).toFixed(3);
     render();
-  } else if (nearest.x == positions[1].x) {
+  } else if (nearest == positions[1]) {
     document.getElementById('selAbs').textContent =
       selected.absorbance.toFixed(3);
     render();
