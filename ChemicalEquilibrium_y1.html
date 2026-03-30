@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>134 - ITE Ext - Chemical Equilibrium</title>
   <style>
-body {
-  width: 1500px;
+
+    body {
+  width: 1100px;
   margin: auto;
   font:
     18px Arial,
@@ -27,46 +28,68 @@ button {
   font-size: 16px;
 }
 
-.tab {
+#sim-box {
+  position: relative;
+  width: 1100px;
   overflow: hidden;
   text-align: center;
+  margin: auto;
+  border: 4px solid #cc9900;
+  border-radius: 15px;
+  padding: 20px 0px 20px 0px;
 }
-/* Style the buttons that are used to open the tab content */
-.tab button {
+
+/* The main container */
+.drawer {
+  position: absolute;
+  top: 15%; /* Vertical position */
+  right: 0;
+  width: 1000px;
+  height: 510px;
+  background-color: white;
+  color: white;
+  transition: transform 0.4s ease-in-out;
+  transform: translateX(100%); /* Start hidden off-screen */
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+  border: 2px solid black;
+  border-radius: 0 0 0 10px;
+}
+
+/* The tab that sticks out */
+.drawer-tab {
   font-size: 22px;
-  padding: 10px 20px;
-  background-image: linear-gradient(#b4c6ff, #e7edff 50%, #b4c6ff);
+  position: absolute;
+  left: -350px; /* Pulls the button out to the left of the hidden drawer */
+  top: 0;
+  width: 350px;
+  height: 40px;
+  background-image: linear-gradient(#edbf35, #fff4ad 50%, #edbf35);
   border: 2px solid;
-  border-radius: 5px;
   cursor: pointer;
   outline: none;
   transition: 0.3s;
+  transform: rotate(-90deg); /* Optional: rotates the text */
+  transform-origin: bottom right;
+  border-radius: 15px 15px 0 0;
 }
-/* Change background color of buttons on hover */
-.tab button:hover {
+.drawer-tab:hover {
   background-color: #f5f5f5;
   border: 2px solid white;
-  border-radius: 5px;
+  border-radius: 15px 15px 0 0;
 }
-/* Create an active/current tablink class */
-.tab button.active {
-  border: 2px solid;
-  border-radius: 5px;
-  background-color: white;
+
+/* The "Open" state */
+.drawer.open {
+  transform: translateX(0); /* Slide back into view */
 }
-/* Style the tab content */
-.tabcontent {
-  display: none;
+.drawer-content {
   padding: 40px;
-  border: 4px solid #cc9900;
   border-radius: 15px;
+  text-align: center;
 }
-#Tab1 {
-  position: relative;
-  width: 100%;
-  height: 600px; /* or whatever fits your layout */
-  overflow: hidden;
-}
+
 
 .button-container {
   text-align: center;
@@ -111,35 +134,29 @@ button {
 
 .glassware-container-1 {
   position: relative;
-  width: 1400px;
+  width: 1000px;
   margin: auto;
 }
 .benchtop {
   position: relative;
   top: 0px;
   left: 0px;
-  width: 1400px;
-  pointer-events: none; /* allows clicks to go through transparent image */
-}
-.spec-top {
-  position: absolute;
-  bottom: 130px;
-  left: 725px;
-  width: 300px;
+  width: 950px;
+  padding: 0px 0px 60px 0px;
   pointer-events: none; /* allows clicks to go through transparent image */
 }
 .spec-bottom {
   position: absolute;
   z-index: 100;
-  bottom: 0px;
-  left: 725px;
-  width: 300px;
+  bottom: 150px;
+  left: 686.5px;
+  width: 290px;
   pointer-events: none; /* allows clicks to go through transparent image */
 }
 .wrap {
   position: absolute;
   top: 0px;
-  left: 8px;
+  left: 35px;
   width: 685px;
 }
 .card {
@@ -165,8 +182,8 @@ canvas {
 .slider-container {
   position: absolute;
   display: inline-block;
-  top: 375px;
-  left: 1170px;
+  bottom: 40px;
+  left: 335px;
   width: 200px;
 }
 .slider {
@@ -225,7 +242,7 @@ canvas {
 }
 
 /* Simulation container overlay */
-#simulation-container {
+#cube-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -247,7 +264,7 @@ canvas {
   pointer-events: auto;
   background: none;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   overflow: hidden;
 }
@@ -261,6 +278,20 @@ canvas {
   width: 100%;
   height: 0%; /* 2/3 fill */
   background: #abdcf2;
+  align-self: flex-end;
+}
+
+
+.cube-label {
+  position: absolute;
+  bottom: 40px;
+  transform: rotate(-90deg);
+  white-space: nowrap;
+  font-size: 10px;
+  color: #cc9900;
+  background: none;
+  z-index: -10; /* Sits above the solvent */
+  pointer-events: none; /* Clicking the text still drags the cube */
 }
 
 /* Temperature bubble */
@@ -368,7 +399,7 @@ canvas {
 .glassware-container-2 {
   margin: auto;
   position: relative;
-  width: 1000px;
+  width: 900px;
 }
 .syringe {
   position: relative;
@@ -453,65 +484,16 @@ canvas {
 }
 
 
+
   </style>
 </head>
 <body>
-<div id="Tab1" class="tabcontent">
-    <div class="tab" style="position: absolute; right: 70px; bottom: 100px; z-index: 100;">
-      <button class="tablinks" onclick="openTabs(event, 'Tab2'); resetSyringes(); resetCuvette(); updateCanvas(lambda);">Prepare reaction mixture!</button>
-    </div>
-  <button id="resetButton" class="control-button" style="font-size: 22px; position: absolute; right: 40px; top: 40px; z-index: 100;">Reset All Controls</button>
-  <div class="glassware-container-1">
-      <img
-        class="benchtop"
-      src="https://github.com/johannalherman/134-ITE/blob/main/ComputerSpecTemp.png?raw=true"
-    />
-      <img
-        class="spec-top"
-      src="https://github.com/johannalherman/134-ITE/blob/main/spec%20top.png?raw=true"
-    />
-      <img
-        class="spec-bottom"
-      src="https://github.com/johannalherman/134-ITE/blob/main/spec%20bottom.png?raw=true"
-    />
-    <div class="wrap">
-      <div class="card">
-        <div class="results" style="font-style: italic; color: #cc9900;"">
-          Click on graph below to select a wavelength to measure.
-        </div>
-        <div class="row1" style="margin: 20px">
-          <div class="column1">
-            <div class="results">
-              <strong>Selected λ:</strong>
-              <span id="selLambda" class="value">---</span> nm
-            </div>
-          </div>
-          <div class="column1">
-            <div class="results">
-              <strong>Abs:</strong> <span id="selAbs" class="value">-.---</span>
-            </div>
-          </div>
-        </div>
-        <canvas id="plotCanvas" width="800" height="520"></canvas>
-      </div>
-    </div>
-      <div class="slider-container">
-  <div id="temp-bubble-bath">20°C</div>
-    <input type="range" min="20" max="90" value="20" class="slider" id="tempSlider">
-  </div>
-  </div>
-        
-  <!-- Simulation overlay container -->
-  <div id="simulation-container">
-    <div class="cube" id="cube">
-      <div class="solvent" id="solvent"></div>
-    </div>
-    <div id="temp-bubble-cuv">20°C</div>
-  </div>
 
-</div>
+  <div id="sim-box">
 
-<div id="Tab2" class="tabcontent">
+  <div id="sideDrawer" class="drawer">
+    <button id="drawerTab" class="drawer-tab">Click to View Reagents</button>
+    <div class="drawer-content">
     <div class="glassware-container-2">
       <div class="row2">
         <div class="column2">
@@ -589,11 +571,59 @@ canvas {
       </div>
     </div>
 
-    <div class="tab" style="margin: 140px 10px 10px 10px;">
-    <button class="tablinks" id="defaultOpen" onclick="openTabs(event, 'Tab1'); calcThermoVars();">Combine measured reagent amounts in cuvette!</button>
+    </div>
+  </div>
+
+  <button id="resetButton" class="control-button" style="font-size: 22px; position: absolute; right: 40px; top: 40px; z-index: 100;">Reset All Controls</button>
+
+  <div class="glassware-container-1">
+      <img
+        class="benchtop"
+      src="https://github.com/johannalherman/134-ITE/blob/main/ComputerSpecTemp_v26S.1.png?raw=true"
+    />
+      <img
+        class="spec-bottom"
+      src="https://github.com/johannalherman/134-ITE/blob/main/spec%20bottom.png?raw=true"
+    />
+    <div class="wrap">
+      <div class="card">
+        <div class="results" style="font-style: italic; color: #cc9900;"">
+          Click on graph below to select a wavelength to measure.
+        </div>
+        <div class="row1" style="margin: 20px">
+          <div class="column1">
+            <div class="results">
+              <strong>Selected λ:</strong>
+              <span id="selLambda" class="value">---</span> nm
+            </div>
+          </div>
+          <div class="column1">
+            <div class="results">
+              <strong>Abs:</strong> <span id="selAbs" class="value">-.---</span>
+            </div>
+          </div>
+        </div>
+        <canvas id="plotCanvas" width="800" height="520"></canvas>
+      </div>
+    </div>
+      <div class="slider-container">
+  <div id="temp-bubble-bath">20°C</div>
+    <input type="range" min="20" max="90" value="20" class="slider" id="tempSlider">
+  </div>
+  </div>
+        
+  <!-- Simulation overlay container -->
+  <div id="cube-container">
+    <div class="cube" id="cube">
+      <div class="solvent" id="solvent"></div>
+      <span class="cube-label">Drag to move!</span>
+    </div>
+    <div id="temp-bubble-cuv">20°C</div>
   </div>
 
 </div>
+
+
 
 <div style="color: #cc9900; text-align: left; margin-top: 40px;"">
   <p>This simulation was designed for use on a laptop or desktop computer. Functions may not operate on a mobile device.</p>
@@ -601,7 +631,8 @@ canvas {
 </div>
   
 <script>
-function getRandomAmount(min, max) {
+
+  function getRandomAmount(min, max) {
   return Math.random() * (max - min) + min;
 }
 
@@ -1319,17 +1350,17 @@ window.addEventListener('DOMContentLoaded', () => {
 const cube = document.getElementById('cube');
 const tempBubble_cuv = document.getElementById('temp-bubble-cuv');
 tempBubble_cuv.textContent = `${solTemp_C}°C`;
-const container = document.getElementById('simulation-container');
+const container = document.getElementById('cube-container');
 
 const cubeWidth = 26;
 const cubeHeight = 88;
 
 // Define positions (adjust as needed)
 const positions = [
-  { x: 1160, y: 550 }, // start
-  { x: 1037, y: 553 }, // spec
-  { x: 1054, y: 318 }, // ice bath
-  { x: 1359, y: 338 }, // water bath
+  { x: 850, y: 450 }, // start
+  { x: 950, y: 584 }, // spec
+  { x: 225, y: 655 }, // ice bath
+  { x: 490, y: 690 }, // water bath
 ];
 let nearest = positions[0]; // use nearest["x"] OR nearest.x to find current x position
 let markers = [];
@@ -1623,29 +1654,39 @@ window.getSelectedAbsorbance = () => selected.absorbance;
 
 // end tab 2 //
 
-function openTabs(evt, Sim_part) {
-  // Declare all variables
-  var i, tabcontent, tablinks;
 
-  // Get all elements with class="tabcontent" and hide them
-  tabcontent = document.getElementsByClassName('tabcontent');
-  for (i = 0; i < tabcontent.length; i++) {
-    tabcontent[i].style.display = 'none';
-  }
 
-  // Get all elements with class="tablinks" and remove the class "active"
-  tablinks = document.getElementsByClassName('tablinks');
-  for (i = 0; i < tablinks.length; i++) {
-    tablinks[i].className = tablinks[i].className.replace(' active', '');
-  }
 
-  // Show the current tab, and add an "active" class to the button that opened the tab
-  document.getElementById(Sim_part).style.display = 'block';
-  evt.currentTarget.className += ' active';
+
+const drawer = document.getElementById('sideDrawer');
+const tab = document.getElementById('drawerTab');
+
+// 1. Define your custom functions
+function onDrawerOpen() {
+ // console.log("Drawer is now open!");
+  resetSyringes(); resetCuvette(); updateCanvas(lambda);
 }
 
-// Get the element with id="defaultOpen" and click on it
-document.getElementById('defaultOpen').click();
+function onDrawerClose() {
+  // console.log("Drawer is now closed!");
+  calcThermoVars();
+}
+
+// 2. Update the listener to check the state
+tab.addEventListener('click', () => {
+  drawer.classList.toggle('open');
+
+  // 3. Use .contains() to see what happened
+  if (drawer.classList.contains('open')) {
+    tab.innerText = "Click to Dispense Reagents";
+    onDrawerOpen();
+  } else {
+    tab.innerText = "Click to View Reagents";
+    onDrawerClose();
+  }
+});
+
+
 
 // rest cyvette
 function resetCuvette() {
@@ -1680,6 +1721,7 @@ function resetAll() {
   document.getElementById('selAbs').textContent = '-.---';
 }
 resetAll();
+
 
 
 </script>
