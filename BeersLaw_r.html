@@ -6,7 +6,7 @@
   <title>134 - ITE Ext - Beer's Law For Reactant B</title>
   <style>
 body {
-  width: 1000px;
+  width: 1100px;
   margin: auto;
   font:
     18px Arial,
@@ -27,45 +27,64 @@ button {
   font-size: 16px;
 }
 
-.tab {
+#sim-box {
+  position: relative;
+  width: 1100px;
+  height: 650px; /* or whatever fits your layout */
   overflow: hidden;
   text-align: center;
+  margin: auto;
 }
-/* Style the buttons that are used to open the tab content */
-.tab button {
+
+/* The main container */
+.drawer {
+  position: absolute;
+  top: 15%; /* Vertical position */
+  right: 0;
+  width: 700px;
+  height: 510px;
+  background-color: white;
+  color: white;
+  transition: transform 0.4s ease-in-out;
+  transform: translateX(100%); /* Start hidden off-screen */
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+  border: 2px solid black;
+  border-radius: 0 0 0 10px;
+}
+
+/* The tab that sticks out */
+.drawer-tab {
   font-size: 22px;
-  padding: 10px 20px;
-  background-image: linear-gradient(#b4c6ff, #e7edff 50%, #b4c6ff);
+  position: absolute;
+  left: -350px; /* Pulls the button out to the left of the hidden drawer */
+  top: 0;
+  width: 350px;
+  height: 40px;
+  background-image: linear-gradient(#edbf35, #fff4ad 50%, #edbf35);
   border: 2px solid;
-  border-radius: 5px;
   cursor: pointer;
   outline: none;
   transition: 0.3s;
+  transform: rotate(-90deg); /* Optional: rotates the text */
+  transform-origin: bottom right;
+  border-radius: 15px 15px 0 0;
 }
-/* Change background color of buttons on hover */
-.tab button:hover {
+.drawer-tab:hover {
   background-color: #f5f5f5;
   border: 2px solid white;
-  border-radius: 5px;
+  border-radius: 15px 15px 0 0;
 }
-/* Create an active/current tablink class */
-.tab button.active {
-  border: 2px solid;
-  border-radius: 5px;
-  background-color: white;
+
+/* The "Open" state */
+.drawer.open {
+  transform: translateX(0); /* Slide back into view */
 }
-/* Style the tab content */
-.tabcontent {
-  display: none;
+.drawer-content {
   padding: 40px;
-  border: 4px solid #cc9900;
   border-radius: 15px;
-}
-#Tab1 {
-  position: relative;
-  width: 100%;
-  height: 600px; /* or whatever fits your layout */
-  overflow: hidden;
+  text-align: center;
 }
 
 .button-container {
@@ -88,7 +107,7 @@ button {
 }
 .control-button {
   padding: 10px 20px;
-  background-image: linear-gradient(#edbf35, #fff4ad 50%, #edbf35);
+  background-image: linear-gradient(#b4c6ff, #e7edff 50%, #b4c6ff);
   border: 2px solid black;
   border-radius: 5px;
   cursor: pointer;
@@ -122,19 +141,12 @@ button {
   margin-right: 382px;
   pointer-events: none; /* allows clicks to go through transparent image */
 }
-.spec-top {
-  position: absolute;
-  bottom: 130px;
-  left: 735px;
-  width: 300px;
-  pointer-events: none; /* allows clicks to go through transparent image */
-}
 .spec-bottom {
   position: absolute;
   z-index: 100;
   bottom: 2px;
-  left: 726.5px;
-  width: 283px;
+  left: 727px;
+  width: 283.5px;
   pointer-events: none; /* allows clicks to go through transparent image */
 }
 .wrap {
@@ -164,7 +176,7 @@ canvas {
 }
 
 /* Simulation container overlay */
-#simulation-container {
+#cube-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -186,8 +198,8 @@ canvas {
   pointer-events: auto;
   background: none;
   display: flex;
-  align-items: flex-end;
   justify-content: center;
+  align-items: center;
   overflow: hidden;
 }
 
@@ -200,6 +212,19 @@ canvas {
   width: 100%;
   height: 0%; /* 2/3 fill */
   background: #abdcf2;
+  align-self: flex-end;
+}
+
+.cube-label {
+  position: absolute;
+  bottom: 40px;
+  transform: rotate(-90deg);
+  white-space: nowrap;
+  font-size: 10px;
+  color: #cc9900;
+  background: none;
+  z-index: -10; /* Sits above the solvent */
+  pointer-events: none; /* Clicking the text still drags the cube */
 }
 
 /* Marker as X */
@@ -213,7 +238,7 @@ canvas {
 
 .marker::before,
 .marker::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 50%;
   top: 50%;
@@ -271,7 +296,7 @@ canvas {
   }
 }
 
-/* tab 2 */
+/* drawer content */
 .row2 {
   display: flex;
 }
@@ -367,27 +392,98 @@ canvas {
   pointer-events: none;
 }
 
+
   </style>
 </head>
 <body>
-  
-<div id="Tab1" class="tabcontent">
-    <div class="tab" style="position: absolute; right: 70px; bottom: 250px; z-index: 100;">
-      <button class="tablinks" onclick="openTabs(event, 'Tab2'); resetSyringes(); resetCuvette(); findAbs(); updateCanvas(lambda);">Prepare cuvette!</button>
+<div id="sim-box">
+  <div id="sideDrawer" class="drawer">
+    <button id="drawerTab" class="drawer-tab">Click to Show Reagents</button>
+    <div class="drawer-content">
+      <div class="glassware-container-2">
+        <div class="row2">
+          <div class="column2">
+            <div class="container" id="cylinder1">
+              <div class="solution" id="solution1"></div>
+              <img
+                class="syringe"
+                id="syringe1"
+                src="https://github.com/johannalherman/134-ITE/blob/main/3.0-mL%20syringe.png?raw=true"
+              />
+              <img
+                class="plunger"
+                id="plunger1"
+                src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
+              />
+              <img
+                class="beaker"
+                id="beaker1"
+                src="https://github.com/johannalherman/134-ITE/blob/main/Beaker.png?raw=true"
+              />
+              <div class="beaker_solution" id="beaker_solution1"></div>
+            </div>
+            <div class="beakerlabels" style="text-align: center">
+              <span id="conc_A0"
+                ><strong>Reagent A:</strong>
+                <span class="value">-.-- M</span></span
+              >
+            </div>
+          </div>
+          <div class="column2">
+            <div class="container" id="cylinder3">
+              <div class="solution" id="solution3"></div>
+              <img
+                class="syringe"
+                id="syringe3"
+                src="https://github.com/johannalherman/134-ITE/blob/main/3.0-mL%20syringe.png?raw=true"
+              />
+              <img
+                class="plunger"
+                id="plunger3"
+                src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
+              />
+              <img
+                class="beaker"
+                id="beaker3"
+                src="https://github.com/johannalherman/134-ITE/blob/main/Beaker.png?raw=true"
+              />
+              <div class="beaker_solution" id="beaker_solution3"></div>
+            </div>
+            <div class="beakerlabels" style="text-align: center">
+              <span><strong>D.I. Water</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  <button id="resetButton" class="control-button" style="font-size: 22px; position: absolute; right: 40px; top: 40px; z-index: 100;">Reset All Controls</button>
+  </div>
+
+  <button
+    id="resetButton"
+    class="control-button"
+    style="
+      font-size: 22px;
+      position: absolute;
+      right: 40px;
+      top: 40px;
+      z-index: 100;
+    "
+  >
+    Reset All Controls
+  </button>
+
   <div class="glassware-container-1">
-      <img
-        class="benchtop"
+    <img
+      class="benchtop"
       src="https://github.com/johannalherman/134-ITE/blob/main/ComputerSpec.png?raw=true"
     />
-      <img
-        class="spec-bottom"
+    <img
+      class="spec-bottom"
       src="https://github.com/johannalherman/134-ITE/blob/main/spec%20bottom.png?raw=true"
     />
     <div class="wrap">
       <div class="card">
-        <div class="results" style="font-style: italic; color: #cc9900;">
+        <div class="results" style="font-style: italic; color: #cc9900">
           Click on graph below to select a wavelength to measure.
         </div>
         <div class="row1" style="margin: 20px">
@@ -407,88 +503,37 @@ canvas {
       </div>
     </div>
   </div>
-        
+
   <!-- Simulation overlay container -->
-  <div id="simulation-container">
+  <div id="cube-container">
     <div class="cube" id="cube">
+      <span class="cube-label">Drag to move!</span>
       <div class="solvent" id="solvent"></div>
     </div>
   </div>
-
 </div>
 
-<div id="Tab2" class="tabcontent">
-    <div class="glassware-container-2">
-      <div class="row2">
-        <div class="column2">
-          <div class="container" id="cylinder1">
-            <div class="solution" id="solution1"></div>
-            <img
-              class="syringe"
-              id="syringe1"
-              src="https://github.com/johannalherman/134-ITE/blob/main/3.0-mL%20syringe.png?raw=true"
-            />
-            <img
-              class="plunger"
-              id="plunger1"
-              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
-            />
-            <img
-              class="beaker"
-              id="beaker1"
-              src="https://github.com/johannalherman/134-ITE/blob/main/Beaker.png?raw=true"
-            />
-            <div class="beaker_solution" id="beaker_solution1"></div>
-          </div>
-          <div class="beakerlabels" style="text-align: center;">
-            <span id="conc_A0"><strong>Reagent A:</strong> <span class="value">-.-- M</span></span>
-          </div>
-        </div>
-        <div class="column2">
-          <div class="container" id="cylinder3">
-            <div class="solution" id="solution3"></div>
-            <img
-              class="syringe"
-              id="syringe3"
-              src="https://github.com/johannalherman/134-ITE/blob/main/3.0-mL%20syringe.png?raw=true"
-            />
-            <img
-              class="plunger"
-              id="plunger3"
-              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
-            />
-            <img
-              class="beaker"
-              id="beaker3"
-              src="https://github.com/johannalherman/134-ITE/blob/main/Beaker.png?raw=true"
-            />
-            <div class="beaker_solution" id="beaker_solution3"></div>
-          </div>
-          <div class="beakerlabels" style="text-align: center;">
-            <span><strong>D.I. Water</strong></span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="tab" style="margin: 140px 10px 10px 10px;">
-    <button class="tablinks" id="defaultOpen" onclick="openTabs(event, 'Tab1'); findAbs();">Combine measured reagent amounts in cuvette!</button>
-  </div>
-
+<div style="color: #cc9900; text-align: left; margin-top: 40px">
+  <p>
+    This simulation was designed for use on a laptop or desktop computer.
+    Functions may not operate on a mobile device.
+  </p>
+  <p>
+    Created by Johanna L. Herman, Ph.D. for use in CHEM 134 at the University of
+    Delaware.
+  </p>
 </div>
 
-<div style="color: #cc9900; text-align: left; margin-top: 40px;">
-  <p>This simulation was designed for use on a laptop or desktop computer. Functions may not operate on a mobile device.</p>
-  <p>Created by Johanna L. Herman, Ph.D. for use in CHEM 134 at the University of Delaware.</p>
-</div>
   
 <script>
+
 function getRandomAmount(min, max) {
   return Math.random() * (max - min) + min;
 }
 
 // version setup
 let solColor = '#d34e4b';
+let lambda = 930;
 var bc = {
   380: 13.47235,
   381: 14.13197,
@@ -1126,14 +1171,14 @@ setupSyringe(
 // tab 1 start //
 // cuvette object (start)
 const cube = document.getElementById('cube');
-const container = document.getElementById('simulation-container');
+const container = document.getElementById('cube-container');
 const cubeWidth = 26;
 const cubeHeight = 88;
 
 // Define positions (adjust as needed)
 const positions = [
-  { x: 900, y: 300 }, // start
-  { x: 975, y: 528 }, // spec
+  { x: 840, y: 390 }, // start
+  { x: 985, y: 512 }, // spec
 ];
 let nearest = positions[0]; // use nearest["x"] OR nearest.x to find current x position
 let markers = [];
@@ -1235,7 +1280,6 @@ function distance(x1, y1, x2, y2) {
 }
 
 // spectrum (start)
-let lambda = 950;
 const canvas = document.getElementById('plotCanvas');
 const ctx = canvas.getContext('2d');
 const margin = { l: 100, r: 50, t: 24, b: 100 };
@@ -1405,31 +1449,37 @@ window.getSelectedAbsorbance = () => selected.absorbance;
 
 // end tab 2 //
 
-function openTabs(evt, Sim_part) {
-  // Declare all variables
-  var i, tabcontent, tablinks;
 
-  // Get all elements with class="tabcontent" and hide them
-  tabcontent = document.getElementsByClassName('tabcontent');
-  for (i = 0; i < tabcontent.length; i++) {
-    tabcontent[i].style.display = 'none';
-  }
+const drawer = document.getElementById('sideDrawer');
+const tab = document.getElementById('drawerTab');
 
-  // Get all elements with class="tablinks" and remove the class "active"
-  tablinks = document.getElementsByClassName('tablinks');
-  for (i = 0; i < tablinks.length; i++) {
-    tablinks[i].className = tablinks[i].className.replace(' active', '');
-  }
-
-  // Show the current tab, and add an "active" class to the button that opened the tab
-  document.getElementById(Sim_part).style.display = 'block';
-  evt.currentTarget.className += ' active';
+// 1. Define your custom functions
+function onDrawerOpen() {
+ // console.log("Drawer is now open!");
+  resetSyringes(); resetCuvette(); findAbs(); updateCanvas(lambda);
 }
 
-// Get the element with id="defaultOpen" and click on it
-document.getElementById('defaultOpen').click();
+function onDrawerClose() {
+  // console.log("Drawer is now closed!");
+  findAbs();
+}
 
-// rest cyvette
+// 2. Update the listener to check the state
+tab.addEventListener('click', () => {
+  drawer.classList.toggle('open');
+
+  // 3. Use .contains() to see what happened
+  if (drawer.classList.contains('open')) {
+    tab.innerText = "Click to Hide Reagents";
+    onDrawerOpen();
+  } else {
+    tab.innerText = "Click to Show Reagents";
+    onDrawerClose();
+  }
+});
+
+
+// reset cyvette
 function resetCuvette() {
   const elementSol = document.getElementById('solvent');
   elementSol.style.height = 0 + '%';
@@ -1447,6 +1497,7 @@ function resetSyringes() {
 // Reset
 resetButton.addEventListener('click', resetAll);
 function resetAll() {
+  drawer.classList.remove('open');
   resetCuvette();
   resetSyringes();
   findAbs(0);
