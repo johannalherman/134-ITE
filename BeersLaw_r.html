@@ -396,7 +396,6 @@ canvas {
 }
 
 
-
   </style>
 </head>
 <body>
@@ -1091,7 +1090,7 @@ var bc = {
   929: 0.0,
   930: 0.0,
 };
-let conc_A0 = getRandomAmount(0.0013 * 0.95, 0.0013 * 1.05); // in M
+let conc_A0 = getRandomAmount(0.001 * 0.95, 0.001 * 1.05); // in M
 let conc_Ai = 0;
 
 // tab 2 start //
@@ -1113,10 +1112,27 @@ function calcAi() {
 // Spectrum Plot// Create data array from object bc
 function findAbs(conc) {
   calcAi();
-  data = Object.keys(bc).map((w) => ({
-    w: Number(w),
-    a: conc * bc[w],
-  }));
+  data = Object.keys(bc).map((w) => {
+    let theoreticalAbs = conc * bc[w];
+    let finalAbs = theoreticalAbs;
+
+    // Detector saturation logic
+    if (theoreticalAbs >= 1.58) {
+      // 1. Cap the base at 1.6
+      // 2. Add "noise" (random jitter between -0.02 and +0.02)
+      const noise = (Math.random() - 0.5) * 0.04; 
+      finalAbs = 1.6 + noise;
+    } else if (theoreticalAbs > 1.5) {
+      // Optional: Add slight jitter as it approaches the limit
+      const approachNoise = (Math.random() - 0.5) * 0.01;
+      finalAbs = theoreticalAbs + approachNoise;
+    }
+
+    return {
+      w: Number(w),
+      a: finalAbs,
+    };
+  });
 }
 findAbs(conc_Ai);
 let selected = { lambda: null, absorbance: null };
@@ -1290,7 +1306,7 @@ const margin = { l: 100, r: 50, t: 24, b: 100 };
 let xMin = 380,
   xMax = 930,
   yMin = 0,
-  yMax = 1;
+  yMax = 1.0;
 
 function transformX(w) {
   return (
@@ -1384,6 +1400,16 @@ function drawIndicatorLine(lambda) {
   ctx.setLineDash([]);
 }
 function render() {
+  // 1. Calculate the max value from the current data
+  let dataMax = 0;
+  if (data && data.length > 0) {
+    dataMax = Math.max(...data.map(p => p.a));
+  }
+
+  // 2. Set yMax: Use the data max + 10% padding, 
+  // but cap it at 1.6 and ensure a minimum floor (e.g., 0.1)
+  yMax = Math.min(1.6, Math.max(1.0, dataMax * 1.1));
+
   clearCanvas();
   drawAxes();
   drawSpectrum(data);
@@ -1446,8 +1472,7 @@ window.getSelectedAbsorbance = () => selected.absorbance;
 (function init() {
   xMin = Math.min(...data.map((p) => p.w));
   xMax = Math.max(...data.map((p) => p.w));
-  yMin = 0;
-  yMax = 1;
+  // yMin and yMax will be set automatically inside render()
   render();
 })();
 
