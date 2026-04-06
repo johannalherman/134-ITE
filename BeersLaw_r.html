@@ -65,7 +65,7 @@ button {
   top: 0;
   width: 350px;
   height: 40px;
-  background-image: linear-gradient(#edbf35, #fff4ad 50%, #edbf35);
+  background-image: linear-gradient(#b4c6ff, #e7edff 50%, #b4c6ff);
   border: 2px solid;
   cursor: pointer;
   outline: none;
@@ -110,7 +110,7 @@ button {
 }
 .control-button {
   padding: 10px 20px;
-  background-image: linear-gradient(#b4c6ff, #e7edff 50%, #b4c6ff);
+  background-image: linear-gradient(#edbf35, #fff4ad 50%, #edbf35);
   border: 2px solid black;
   border-radius: 5px;
   cursor: pointer;
@@ -396,12 +396,13 @@ canvas {
 }
 
 
+
   </style>
 </head>
 <body>
 <div id="sim-box">
   <div id="sideDrawer" class="drawer">
-    <button id="drawerTab" class="drawer-tab">Click to Show Reagents</button>
+    <button id="drawerTab" class="drawer-tab">Click to View Reagents</button>
     <div class="drawer-content">
       <div class="glassware-container-2">
         <div class="row2">
@@ -527,9 +528,9 @@ canvas {
   </p>
 </div>
 
+
   
 <script>
-
 function getRandomAmount(min, max) {
   return Math.random() * (max - min) + min;
 }
@@ -1473,10 +1474,10 @@ tab.addEventListener('click', () => {
 
   // 3. Use .contains() to see what happened
   if (drawer.classList.contains('open')) {
-    tab.innerText = "Click to Hide Reagents";
+    tab.innerText = "Click to Dispense Reagents";
     onDrawerOpen();
   } else {
-    tab.innerText = "Click to Show Reagents";
+    tab.innerText = "Click to View Reagents";
     onDrawerClose();
   }
 });
