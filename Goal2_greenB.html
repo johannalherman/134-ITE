@@ -1364,7 +1364,7 @@ function calcThermoVars() {
   if (conc_chromophoref > 0) {
     concRatio = conc_chromophoref / conc_B0;
     elementSol.style.background = solColor;
-    elementSol.style.opacity = 0.5 * concRatio * 2;
+    elementSol.style.opacity = 0.5 * concRatio;
   } else {
     elementSol.style.background = '#abdcf2';
     elementSol.style.opacity = 0.5;
