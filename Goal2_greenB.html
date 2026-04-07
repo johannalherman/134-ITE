@@ -1,0 +1,1788 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>134 - ITE Ext - Chemical Equilibrium</title>
+  <style>
+body {
+  width: 1100px;
+  margin: auto;
+  font:
+    18px Arial,
+    sans-serif;
+  padding: 20px;
+  text-align: center;
+
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+.backend {
+  top: 500px;
+}
+
+button {
+  font-size: 16px;
+}
+
+#sim-box {
+  position: relative;
+  width: 1100px;
+  overflow: hidden;
+  text-align: center;
+  margin: auto;
+  border: 4px solid #cc9900;
+  border-radius: 15px;
+  padding: 20px 0px 20px 0px;
+}
+
+/* The main container */
+.drawer {
+  position: absolute;
+  top: 15%; /* Vertical position */
+  right: 0;
+  width: 1000px;
+  height: 510px;
+  background-color: white;
+  color: white;
+  transition: transform 0.4s ease-in-out;
+  transform: translateX(100%); /* Start hidden off-screen */
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+  border: 2px solid black;
+  border-radius: 0 0 0 10px;
+}
+
+/* The tab that sticks out */
+.drawer-tab {
+  font-size: 22px;
+  position: absolute;
+  left: -350px; /* Pulls the button out to the left of the hidden drawer */
+  top: 0;
+  width: 350px;
+  height: 40px;
+  background-image: linear-gradient(#b4c6ff, #e7edff 50%, #b4c6ff);
+  border: 2px solid;
+  cursor: pointer;
+  outline: none;
+  transition: 0.3s;
+  transform: rotate(-90deg); /* Optional: rotates the text */
+  transform-origin: bottom right;
+  border-radius: 15px 15px 0 0;
+}
+.drawer-tab:hover {
+  background-color: #f5f5f5;
+  border: 2px solid white;
+  border-radius: 15px 15px 0 0;
+}
+
+/* The "Open" state */
+.drawer.open {
+  transform: translateX(0); /* Slide back into view */
+}
+.drawer-content {
+  padding: 40px;
+  border-radius: 15px;
+  text-align: center;
+}
+
+
+.button-container {
+  text-align: center;
+  z-index: 100;
+}
+.button-container button {
+  margin: 20px 0px 0px 0px;
+  padding: 10px 20px;
+  border: 2px solid;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.button-container button:hover {
+  border: 2px solid white;
+}
+.button-container button:focus {
+  padding: 9px 19px;
+  border: 3px solid #cc9900;
+}
+.control-button {
+  padding: 10px 20px;
+  background-image: linear-gradient(#edbf35, #fff4ad 50%, #edbf35);
+  border: 2px solid black;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.control-button:hover {
+  border: 2px solid white;
+}
+.control-button:focus {
+  padding: 9px 19px;
+  border: 3px solid #cc9900;
+}
+
+.row1 {
+  display: flex;
+}
+.column1 {
+  flex: 50%;
+}
+
+.glassware-container-1 {
+  position: relative;
+  width: 1000px;
+  margin: auto;
+}
+.benchtop {
+  position: relative;
+  top: 0px;
+  left: 0px;
+  width: 950px;
+  padding: 0px 0px 60px 0px;
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+.spec-bottom {
+  position: absolute;
+  z-index: 100;
+  bottom: 150px;
+  left: 686.5px;
+  width: 290px;
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+.wrap {
+  position: absolute;
+  top: 0px;
+  left: 35px;
+  width: 685px;
+}
+.card {
+  padding: 40px 0px 20px 0px;
+}
+canvas {
+  width: 90%;
+  height: 350px;
+  cursor: pointer;
+  /* border: 1px solid #000; */
+}
+.results {
+  font-size: 20px;
+  text-align: center;
+  margin: -6px 0px -6px 0px;
+}
+.value {
+  font-size: 24px;
+  color: #cc9900;
+  margin: -6px 10px -6px 10px;
+}
+
+.slider-container {
+  position: absolute;
+  display: inline-block;
+  bottom: 40px;
+  left: 335px;
+  width: 200px;
+}
+.slider {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 12px;
+  border-radius: 5px;
+  background: linear-gradient(to right, yellow, red);
+  outline: none;
+  opacity: 0.95;
+  transition: opacity 0.2s;
+}
+.slider:hover {
+  opacity: 1;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #333;
+  cursor: pointer;
+}
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #333;
+  cursor: pointer;
+}
+#temp-bubble-bath {
+  position: absolute;
+  bottom: -30px;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  pointer-events: none;
+  transition: left 0.05s linear;
+  white-space: nowrap;
+}
+#temp-bubble-bath::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+/* Simulation container overlay */
+#cube-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* Cube */
+.cube {
+  width: 26px;
+  height: 88px;
+  position: absolute;
+  cursor: grab;
+  border: 2px solid #333;
+  border-radius: 2px;
+  z-index: 10;
+  pointer-events: auto;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.cube:active {
+  cursor: grabbing;
+}
+
+/* solvent inside cube */
+.solvent {
+  width: 100%;
+  height: 0%; /* 2/3 fill */
+  background: #abdcf2;
+  align-self: flex-end;
+}
+
+
+.cube-label {
+  position: absolute;
+  bottom: 40px;
+  transform: rotate(-90deg);
+  white-space: nowrap;
+  font-size: 10px;
+  color: #cc9900;
+  background: none;
+  z-index: -10; /* Sits above the solvent */
+  pointer-events: none; /* Clicking the text still drags the cube */
+}
+
+/* Temperature bubble */
+#temp-bubble-cuv {
+  position: absolute;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+#temp-bubble-cuv::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+/* Marker as X */
+.marker {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.marker::before,
+.marker::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40px;
+  height: 4px;
+  transform-origin: center;
+}
+
+.marker::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.marker::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* Radio waves inside markers */
+.wave {
+  position: absolute;
+  z-index: 1000;
+  left: 50%;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #cc9900;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.wave.active {
+  animation: wave 1s linear infinite;
+  opacity: 0.7;
+  z-index: 1000;
+}
+
+.wave:nth-child(1) {
+  animation-delay: 0s;
+}
+.wave:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.wave:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes wave {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+
+/* tab 2 */
+.row2 {
+  display: flex;
+}
+.column2 {
+  width: 30%;
+  padding: 0px 20px;
+}
+
+.glassware-container-2 {
+  margin: auto;
+  position: relative;
+  width: 900px;
+}
+.syringe {
+  position: relative;
+  height: 296.25px; /* 395px; */
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+.plunger {
+  position: absolute;
+  z-index: -10;
+  left: 52%;
+  bottom: 27px; /* 36px; */
+  width: 120%;
+  transform: translateX(-50%);
+  transition: bottom 0.4s ease;
+  height: 296.25px; /* 395px; */
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+.container {
+  position: relative;
+  width: 90px; /* 120px; */
+  height: 300px; /* 400px; */
+  left: 50%;
+  transform: translateX(-50%);
+  /* overflow: hidden; */
+  /* border: 2px solid #666; */
+}
+.solution {
+  position: absolute;
+  z-index: -15;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 27.27px; /* 37px; */
+  width: 80%;
+  height: 89%;
+  background: #abdcf2;
+  opacity: 0.5;
+  transition: height 0.4s ease;
+  pointer-events: none; /* allow clicks to pass through */
+}
+.reading {
+  position: absolute;
+  top: 300px;
+  left: 50%;
+  width: 100px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  text-align: center;
+  color: #222;
+  pointer-events: none;
+}
+.beaker {
+  position: absolute;
+  z-index: 0;
+  width: 180px;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 190px;
+  pointer-events: none; /* allows clicks to go through transparent image */
+}
+.beaker_solution {
+  position: absolute;
+  z-index: -1;
+  width: 160px;
+  height: 120px;
+  border-radius: 0px 0px 30px 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 272px;
+  background: #abdcf2;
+  opacity: 0.5;
+  transition: height 0.4s ease;
+  pointer-events: none; /* allow clicks to pass through */
+}
+.beakerlabels {
+  position: relative;
+  top: 100px;
+  width: 100%;
+  font-size: 20px;
+  text-align: center;
+  color: #222;
+  pointer-events: none;
+}
+
+
+  </style>
+</head>
+<body>
+<div id="sim-box">
+
+  <div id="sideDrawer" class="drawer">
+    <button id="drawerTab" class="drawer-tab">Click to View Reagents</button>
+    <div class="drawer-content">
+    <div class="glassware-container-2">
+      <div class="row2">
+        <div class="column2">
+          <div class="container" id="cylinder1">
+            <div class="solution" id="solution1"></div>
+            <img
+              class="syringe"
+              id="syringe1"
+              src="https://github.com/johannalherman/134-ITE/blob/main/3.0-mL%20syringe.png?raw=true"
+            />
+            <img
+              class="plunger"
+              id="plunger1"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
+            />
+            <img
+              class="beaker"
+              id="beaker1"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Beaker.png?raw=true"
+            />
+            <div class="beaker_solution" id="beaker_solution1"></div>
+          </div>
+          <div class="beakerlabels" style="text-align: center;">
+            <span id="conc_A0"><strong>Reagent A:</strong> <span class="value">-.-- M</span></span>
+          </div>
+        </div>
+        <div class="column2">
+          <div class="container" id="cylinder2">
+            <div class="solution" id="solution2"></div>
+            <img
+              class="syringe"
+              id="syringe2"
+              src="https://github.com/johannalherman/134-ITE/blob/main/3.0-mL%20syringe.png?raw=true"
+            />
+            <img
+              class="plunger"
+              id="plunger2"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
+            />
+            <img
+              class="beaker"
+              id="beaker2"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Beaker.png?raw=true"
+            />
+            <div class="beaker_solution" id="beaker_solution2"></div>
+          </div>
+          <div class="beakerlabels" style="text-align: center;">
+            <span id="conc_B0"><strong>Reagent B:</strong> <span class="value">-.-- M</span></span>
+          </div>
+        </div>
+        <div class="column2">
+          <div class="container" id="cylinder3">
+            <div class="solution" id="solution3"></div>
+            <img
+              class="syringe"
+              id="syringe3"
+              src="https://github.com/johannalherman/134-ITE/blob/main/3.0-mL%20syringe.png?raw=true"
+            />
+            <img
+              class="plunger"
+              id="plunger3"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Syringe%20Plunger.png?raw=true"
+            />
+            <img
+              class="beaker"
+              id="beaker3"
+              src="https://github.com/johannalherman/134-ITE/blob/main/Beaker.png?raw=true"
+            />
+            <div class="beaker_solution" id="beaker_solution3"></div>
+          </div>
+          <div class="beakerlabels" style="text-align: center;">
+            <span><strong>D.I. Water</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </div>
+  </div>
+
+  <button id="resetButton" class="control-button" style="font-size: 22px; position: absolute; right: 40px; top: 40px; z-index: 100;">Reset All Controls</button>
+
+  <div class="glassware-container-1">
+      <img
+        class="benchtop"
+      src="https://github.com/johannalherman/134-ITE/blob/main/ComputerSpecTemp_v26S.1.png?raw=true"
+    />
+      <img
+        class="spec-bottom"
+      src="https://github.com/johannalherman/134-ITE/blob/main/spec%20bottom.png?raw=true"
+    />
+    <div class="wrap">
+      <div class="card">
+        <div class="results" style="font-style: italic; color: #cc9900;"">
+          Click on graph below to select a wavelength to measure.
+        </div>
+        <div class="row1" style="margin: 20px">
+          <div class="column1">
+            <div class="results">
+              <strong>Selected λ:</strong>
+              <span id="selLambda" class="value">---</span> nm
+            </div>
+          </div>
+          <div class="column1">
+            <div class="results">
+              <strong>Abs:</strong> <span id="selAbs" class="value">-.---</span>
+            </div>
+          </div>
+        </div>
+        <canvas id="plotCanvas" width="800" height="520"></canvas>
+      </div>
+    </div>
+      <div class="slider-container">
+  <div id="temp-bubble-bath">20°C</div>
+    <input type="range" min="20" max="90" value="20" class="slider" id="tempSlider">
+  </div>
+  </div>
+        
+  <!-- Simulation overlay container -->
+  <div id="cube-container">
+    <div class="cube" id="cube">
+      <div class="solvent" id="solvent"></div>
+      <span class="cube-label">Drag to move!</span>
+    </div>
+    <div id="temp-bubble-cuv">20°C</div>
+  </div>
+
+</div>
+
+
+
+<div style="color: #cc9900; text-align: left; margin-top: 40px;"">
+  <p>This simulation was designed for use on a laptop or desktop computer. Functions may not operate on a mobile device.</p>
+  <p>Created by Johanna L. Herman, Ph.D. for use in CHEM 134 at the University of Delaware.</p>
+</div>
+  
+<script>
+function getRandomAmount(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+// setup //
+let chromophore = 'A';
+let solColor = '#7BBA4D';
+let term_cat = 35000;
+let term_dog = 112;
+var bc = {
+  380: 0.0,
+  381: 0.0,
+  382: 0.0,
+  383: 0.0,
+  384: 0.0,
+  385: 0.0,
+  386: 0.0,
+  387: 0.0,
+  388: 0.0,
+  389: 0.0,
+  390: 0.0,
+  391: 0.0,
+  392: 0.0,
+  393: 0.0,
+  394: 0.0,
+  395: 0.0,
+  396: 0.0,
+  397: 0.0,
+  398: 0.0,
+  399: 0.0,
+  400: 0.0,
+  401: 0.0,
+  402: 0.0,
+  403: 0.0,
+  404: 0.0,
+  405: 0.0,
+  406: 0.0,
+  407: 0.0,
+  408: 0.0,
+  409: 0.0,
+  410: 0.0,
+  411: 0.0,
+  412: 0.0,
+  413: 0.0,
+  414: 0.0,
+  415: 0.0,
+  416: 0.0,
+  417: 0.0,
+  418: 0.0,
+  419: 0.0,
+  420: 0.0,
+  421: 0.0,
+  422: 0.0,
+  423: 0.0,
+  424: 0.0,
+  425: 0.0,
+  426: 0.0,
+  427: 0.0,
+  428: 0.0,
+  429: 0.0,
+  430: 0.0,
+  431: 0.0,
+  432: 0.0,
+  433: 0.0,
+  434: 0.0,
+  435: 0.0,
+  436: 0.0,
+  437: 0.0,
+  438: 0.0,
+  439: 0.0,
+  440: 0.0,
+  441: 0.0,
+  442: 0.0,
+  443: 0.0,
+  444: 0.0,
+  445: 0.0,
+  446: 0.0,
+  447: 0.0,
+  448: 0.0,
+  449: 0.0,
+  450: 0.0,
+  451: 0.0,
+  452: 0.0,
+  453: 0.0,
+  454: 0.0,
+  455: 0.0,
+  456: 0.0,
+  457: 0.0,
+  458: 0.0,
+  459: 0.0,
+  460: 0.0,
+  461: 0.0,
+  462: 0.0,
+  463: 0.0,
+  464: 0.00001,
+  465: 0.00001,
+  466: 0.00001,
+  467: 0.00001,
+  468: 0.00001,
+  469: 0.00001,
+  470: 0.00001,
+  471: 0.00002,
+  472: 0.00002,
+  473: 0.00002,
+  474: 0.00003,
+  475: 0.00003,
+  476: 0.00004,
+  477: 0.00004,
+  478: 0.00005,
+  479: 0.00005,
+  480: 0.00006,
+  481: 0.00007,
+  482: 0.00008,
+  483: 0.0001,
+  484: 0.00011,
+  485: 0.00013,
+  486: 0.00015,
+  487: 0.00017,
+  488: 0.00019,
+  489: 0.00022,
+  490: 0.00026,
+  491: 0.00029,
+  492: 0.00034,
+  493: 0.00039,
+  494: 0.00044,
+  495: 0.00051,
+  496: 0.00058,
+  497: 0.00066,
+  498: 0.00076,
+  499: 0.00086,
+  500: 0.00098,
+  501: 0.00112,
+  502: 0.00128,
+  503: 0.00145,
+  504: 0.00165,
+  505: 0.00188,
+  506: 0.00214,
+  507: 0.00243,
+  508: 0.00275,
+  509: 0.00312,
+  510: 0.00354,
+  511: 0.00401,
+  512: 0.00454,
+  513: 0.00514,
+  514: 0.00581,
+  515: 0.00656,
+  516: 0.00741,
+  517: 0.00836,
+  518: 0.00943,
+  519: 0.01063,
+  520: 0.01198,
+  521: 0.01348,
+  522: 0.01517,
+  523: 0.01705,
+  524: 0.01916,
+  525: 0.02152,
+  526: 0.02415,
+  527: 0.02708,
+  528: 0.03036,
+  529: 0.034,
+  530: 0.03806,
+  531: 0.04258,
+  532: 0.04761,
+  533: 0.05319,
+  534: 0.0594,
+  535: 0.06628,
+  536: 0.07392,
+  537: 0.08239,
+  538: 0.09176,
+  539: 0.10215,
+  540: 0.11363,
+  541: 0.12633,
+  542: 0.14036,
+  543: 0.15585,
+  544: 0.17294,
+  545: 0.19179,
+  546: 0.21256,
+  547: 0.23543,
+  548: 0.26059,
+  549: 0.28827,
+  550: 0.31869,
+  551: 0.3521,
+  552: 0.38876,
+  553: 0.42898,
+  554: 0.47306,
+  555: 0.52134,
+  556: 0.57419,
+  557: 0.63201,
+  558: 0.69521,
+  559: 0.76426,
+  560: 0.83963,
+  561: 0.92187,
+  562: 1.01153,
+  563: 1.10921,
+  564: 1.21557,
+  565: 1.33129,
+  566: 1.45712,
+  567: 1.59385,
+  568: 1.74231,
+  569: 1.90341,
+  570: 2.07812,
+  571: 2.26744,
+  572: 2.47246,
+  573: 2.69433,
+  574: 2.93428,
+  575: 3.1936,
+  576: 3.47367,
+  577: 3.77594,
+  578: 4.10195,
+  579: 4.45332,
+  580: 4.83177,
+  581: 5.2391,
+  582: 5.67722,
+  583: 6.14814,
+  584: 6.65396,
+  585: 7.19689,
+  586: 7.77927,
+  587: 8.40351,
+  588: 9.07217,
+  589: 9.78793,
+  590: 10.55355,
+  591: 11.37195,
+  592: 12.24615,
+  593: 13.17933,
+  594: 14.17475,
+  595: 15.23582,
+  596: 16.3661,
+  597: 17.56924,
+  598: 18.84904,
+  599: 20.20943,
+  600: 21.65447,
+  601: 23.18834,
+  602: 24.81534,
+  603: 26.53991,
+  604: 28.36659,
+  605: 30.30005,
+  606: 32.34508,
+  607: 34.50656,
+  608: 36.78948,
+  609: 39.19893,
+  610: 41.74009,
+  611: 44.41821,
+  612: 47.23863,
+  613: 50.20675,
+  614: 53.32802,
+  615: 56.60795,
+  616: 60.05207,
+  617: 63.66592,
+  618: 67.45509,
+  619: 71.42511,
+  620: 75.58153,
+  621: 79.92986,
+  622: 84.47554,
+  623: 89.22395,
+  624: 94.18039,
+  625: 99.35005,
+  626: 104.738,
+  627: 110.34916,
+  628: 116.18828,
+  629: 122.25995,
+  630: 128.56852,
+  631: 135.11814,
+  632: 141.91269,
+  633: 148.95578,
+  634: 156.25073,
+  635: 163.80054,
+  636: 171.60786,
+  637: 179.67497,
+  638: 188.00376,
+  639: 196.59573,
+  640: 205.45191,
+  641: 214.57289,
+  642: 223.95877,
+  643: 233.60917,
+  644: 243.52314,
+  645: 253.69924,
+  646: 264.13544,
+  647: 274.82911,
+  648: 285.77706,
+  649: 296.97545,
+  650: 308.41984,
+  651: 320.10513,
+  652: 332.02557,
+  653: 344.17474,
+  654: 356.54554,
+  655: 369.13022,
+  656: 381.92031,
+  657: 394.90668,
+  658: 408.07949,
+  659: 421.42823,
+  660: 434.94169,
+  661: 448.60801,
+  662: 462.41464,
+  663: 476.34838,
+  664: 490.39539,
+  665: 504.54119,
+  666: 518.77071,
+  667: 533.06826,
+  668: 547.41762,
+  669: 561.80201,
+  670: 576.20413,
+  671: 590.60621,
+  672: 604.99003,
+  673: 619.33696,
+  674: 633.62797,
+  675: 647.84371,
+  676: 661.96454,
+  677: 675.97053,
+  678: 689.84159,
+  679: 703.55741,
+  680: 717.09762,
+  681: 730.44175,
+  682: 743.56931,
+  683: 756.45987,
+  684: 769.09307,
+  685: 781.44868,
+  686: 793.5067,
+  687: 805.24734,
+  688: 816.65113,
+  689: 827.69894,
+  690: 838.37206,
+  691: 848.65223,
+  692: 858.52172,
+  693: 867.96335,
+  694: 876.96053,
+  695: 885.49737,
+  696: 893.55866,
+  697: 901.12996,
+  698: 908.19761,
+  699: 914.74879,
+  700: 920.77157,
+  701: 926.25492,
+  702: 931.18874,
+  703: 935.56393,
+  704: 939.37239,
+  705: 942.60704,
+  706: 945.26186,
+  707: 947.33188,
+  708: 948.81324,
+  709: 949.70317,
+  710: 950.0,
+  711: 949.70317,
+  712: 948.81324,
+  713: 947.33188,
+  714: 945.26186,
+  715: 942.60704,
+  716: 939.37239,
+  717: 935.56393,
+  718: 931.18874,
+  719: 926.25492,
+  720: 920.77157,
+  721: 914.74879,
+  722: 908.19761,
+  723: 901.12996,
+  724: 893.55866,
+  725: 885.49737,
+  726: 876.96053,
+  727: 867.96335,
+  728: 858.52172,
+  729: 848.65223,
+  730: 838.37206,
+  731: 827.69894,
+  732: 816.65113,
+  733: 805.24734,
+  734: 793.5067,
+  735: 781.44868,
+  736: 769.09307,
+  737: 756.45987,
+  738: 743.56931,
+  739: 730.44175,
+  740: 717.09762,
+  741: 703.55741,
+  742: 689.84159,
+  743: 675.97053,
+  744: 661.96454,
+  745: 647.84371,
+  746: 633.62797,
+  747: 619.33696,
+  748: 604.99003,
+  749: 590.60621,
+  750: 576.20413,
+  751: 561.80201,
+  752: 547.41762,
+  753: 533.06826,
+  754: 518.77071,
+  755: 504.54119,
+  756: 490.39539,
+  757: 476.34838,
+  758: 462.41464,
+  759: 448.60801,
+  760: 434.94169,
+  761: 421.42823,
+  762: 408.07949,
+  763: 394.90668,
+  764: 381.92031,
+  765: 369.13022,
+  766: 356.54554,
+  767: 344.17474,
+  768: 332.02557,
+  769: 320.10513,
+  770: 308.41984,
+  771: 296.97545,
+  772: 285.77706,
+  773: 274.82911,
+  774: 264.13544,
+  775: 253.69924,
+  776: 243.52314,
+  777: 233.60917,
+  778: 223.95877,
+  779: 214.57289,
+  780: 205.45191,
+  781: 196.59573,
+  782: 188.00376,
+  783: 179.67497,
+  784: 171.60786,
+  785: 163.80054,
+  786: 156.25073,
+  787: 148.95578,
+  788: 141.91269,
+  789: 135.11814,
+  790: 128.56852,
+  791: 122.25995,
+  792: 116.18828,
+  793: 110.34916,
+  794: 104.738,
+  795: 99.35005,
+  796: 94.18039,
+  797: 89.22395,
+  798: 84.47554,
+  799: 79.92986,
+  800: 75.58153,
+  801: 71.42511,
+  802: 67.45509,
+  803: 63.66592,
+  804: 60.05207,
+  805: 56.60795,
+  806: 53.32802,
+  807: 50.20675,
+  808: 47.23863,
+  809: 44.41821,
+  810: 41.74009,
+  811: 39.19893,
+  812: 36.78948,
+  813: 34.50656,
+  814: 32.34508,
+  815: 30.30005,
+  816: 28.36659,
+  817: 26.53991,
+  818: 24.81534,
+  819: 23.18834,
+  820: 21.65447,
+  821: 20.20943,
+  822: 18.84904,
+  823: 17.56924,
+  824: 16.3661,
+  825: 15.23582,
+  826: 14.17475,
+  827: 13.17933,
+  828: 12.24615,
+  829: 11.37195,
+  830: 10.55355,
+  831: 9.78793,
+  832: 9.07217,
+  833: 8.40351,
+  834: 7.77927,
+  835: 7.19689,
+  836: 6.65396,
+  837: 6.14814,
+  838: 5.67722,
+  839: 5.2391,
+  840: 4.83177,
+  841: 4.45332,
+  842: 4.10195,
+  843: 3.77594,
+  844: 3.47367,
+  845: 3.1936,
+  846: 2.93428,
+  847: 2.69433,
+  848: 2.47246,
+  849: 2.26744,
+  850: 2.07812,
+  851: 1.90341,
+  852: 1.74231,
+  853: 1.59385,
+  854: 1.45712,
+  855: 1.33129,
+  856: 1.21557,
+  857: 1.10921,
+  858: 1.01153,
+  859: 0.92187,
+  860: 0.83963,
+  861: 0.76426,
+  862: 0.69521,
+  863: 0.63201,
+  864: 0.57419,
+  865: 0.52134,
+  866: 0.47306,
+  867: 0.42898,
+  868: 0.38876,
+  869: 0.3521,
+  870: 0.31869,
+  871: 0.28827,
+  872: 0.26059,
+  873: 0.23543,
+  874: 0.21256,
+  875: 0.19179,
+  876: 0.17294,
+  877: 0.15585,
+  878: 0.14036,
+  879: 0.12633,
+  880: 0.11363,
+  881: 0.10215,
+  882: 0.09176,
+  883: 0.08239,
+  884: 0.07392,
+  885: 0.06628,
+  886: 0.0594,
+  887: 0.05319,
+  888: 0.04761,
+  889: 0.04258,
+  890: 0.03806,
+  891: 0.034,
+  892: 0.03036,
+  893: 0.02708,
+  894: 0.02415,
+  895: 0.02152,
+  896: 0.01916,
+  897: 0.01705,
+  898: 0.01517,
+  899: 0.01348,
+  900: 0.01198,
+  901: 0.01063,
+  902: 0.00943,
+  903: 0.00836,
+  904: 0.00741,
+  905: 0.00656,
+  906: 0.00581,
+  907: 0.00514,
+  908: 0.00454,
+  909: 0.00401,
+  910: 0.00354,
+  911: 0.00312,
+  912: 0.00275,
+  913: 0.00243,
+  914: 0.00214,
+  915: 0.00188,
+  916: 0.00165,
+  917: 0.00145,
+  918: 0.00128,
+  919: 0.00112,
+  920: 0.00098,
+  921: 0.00086,
+  922: 0.00076,
+  923: 0.00066,
+  924: 0.00058,
+  925: 0.00051,
+  926: 0.00044,
+  927: 0.00039,
+  928: 0.00034,
+  929: 0.00029,
+  930: 0.00026,
+  931: 0.00022,
+  932: 0.00019,
+  933: 0.00017,
+  934: 0.00015,
+  935: 0.00013,
+  936: 0.00011,
+  937: 0.0001,
+  938: 0.00008,
+  939: 0.00007,
+  940: 0.00006,
+  941: 0.00005,
+  942: 0.00005,
+  943: 0.00004,
+  944: 0.00004,
+  945: 0.00003,
+  946: 0.00003,
+  947: 0.00002,
+  948: 0.00002,
+  949: 0.00002,
+  950: 0.00001,
+};
+
+// concentrations
+let baseconc = 0.002;
+let conc_A0 = getRandomAmount(baseconc * 0.95, baseconc * 1.05); // in M
+let conc_B0 = getRandomAmount(baseconc * 0.95, baseconc * 1.05); // in M
+
+// spectrum
+const wavelengths = Object.keys(bc).map(Number);
+const coefficients = new Float32Array(wavelengths.map((w) => bc[w]));
+const dataLength = wavelengths.length;
+let conc_chromophoref = 0;
+let data = Object.keys(bc).map((w) => ({
+  w: Number(w),
+  a: conc_chromophoref * bc[w],
+}));
+let selected = { lambda: null, absorbance: null };
+
+// thermodynamics
+let solTemp_C = getRandomAmount(22 * 0.95, 22 * 1.05); // in °C
+let cKelvin = 273.1; // conversion factor between °C and Kelvin
+let cR = 8.314;
+
+// tab 2 start //
+let vol_A = 0; // in mL
+let vol_B = 0; // in mL
+let vol_solvent = 0; // in mL
+let concRatio = 0;
+document.querySelector('#conc_A0 span').textContent =
+  conc_A0.toExponential(3) + ' M';
+document.querySelector('#conc_B0 span').textContent =
+  conc_B0.toExponential(3) + ' M';
+
+// set solution colors
+switch (chromophore) {
+  case 'A':
+    const solution1 = document.getElementById('solution1');
+    solution1.style.background = solColor;
+    const beaker_solution1 = document.getElementById('beaker_solution1');
+    beaker_solution1.style.background = solColor;
+    break;
+  case 'B':
+    const solution2 = document.getElementById('solution2');
+    solution2.style.background = solColor;
+    const beaker_solution2 = document.getElementById('beaker_solution2');
+    beaker_solution2.style.background = solColor;
+    break;
+  default:
+}
+
+// setup reagent dispensers
+function setupSyringe(cylinder, plunger, volumeVar) {
+  cylinder.addEventListener('click', (e) => {
+    const rect = cylinder.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const height = rect.height;
+    const fraction = Math.max(0, Math.min(1, 0.91 - y / height));
+    const percent = fraction * 100;
+
+    // Adjust the plunger position
+    plunger.style.bottom = `${percent + 9}%`;
+
+    // Compute the volume
+    const volume = (fraction * 3.7037).toFixed(2);
+
+    // Store in the correct volume variable
+    if (volumeVar === 'A') vol_A = parseFloat(volume);
+    if (volumeVar === 'B') vol_B = parseFloat(volume);
+    if (volumeVar === 'C') vol_solvent = parseFloat(volume);
+    const vol_T = vol_A + vol_B + vol_solvent;
+
+    if (vol_T > 0) {
+      const elementSol = document.getElementById('solvent');
+      elementSol.style.height = 75 + '%';
+    }
+    setCubePosition(positions[0]);
+    solTemp_C = 20;
+    tempBubble_cuv.textContent = `${solTemp_C}°C`;
+  });
+}
+
+setupSyringe(
+  document.getElementById('cylinder1'),
+  document.getElementById('plunger1'),
+  'A',
+);
+setupSyringe(
+  document.getElementById('cylinder2'),
+  document.getElementById('plunger2'),
+  'B',
+);
+setupSyringe(
+  document.getElementById('cylinder3'),
+  document.getElementById('plunger3'),
+  'C',
+);
+
+function calcThermoVars() {
+  let conc_Ai = (vol_A * conc_A0) / (vol_A + vol_B + vol_solvent);
+  let conc_Bi = (vol_B * conc_B0) / (vol_A + vol_B + vol_solvent);
+  let Kc = Math.exp(term_dog / cR - term_cat / (cR * (solTemp_C + cKelvin)));
+
+  // determine x value
+  let x_num = 0;
+  const a = conc_Ai;
+  const b = conc_Bi;
+  const k = Kc;
+
+  const D = Math.pow(k, 2) * Math.pow(a + b, 2) + 4 * k * (4 - k) * a * b;
+  const m_num = (-k * (a + b) + Math.sqrt(D)) / (2 * (4 - k));
+  const n_num = (-k * (a + b) - Math.sqrt(D)) / (2 * (4 - k));
+
+  if (m_num > 0 && m_num < Math.max(a, b)) {
+    x_num = m_num;
+  } else if (n_num > 0 && n_num < Math.max(a, b)) {
+    x_num = n_num;
+  } else {
+    x_num = 0;
+  }
+
+  switch (chromophore) {
+    case 'A':
+      conc_chromophoref = conc_Ai - x_num;
+      break;
+    case 'B':
+      conc_chromophoref = conc_Bi - x_num;
+      break;
+    default:
+  }
+
+  let newData = new Array(dataLength);
+
+  for (let i = 0; i < dataLength; i++) {
+    let theoreticalAbs = conc_chromophoref * coefficients[i];
+    let finalAbs = theoreticalAbs;
+
+    // Detector saturation/noise logic
+    if (theoreticalAbs >= 1.58) {
+      finalAbs = 1.6 + (Math.random() - 0.5) * 0.04;
+    } else if (theoreticalAbs > 1.5) {
+      finalAbs = theoreticalAbs + (Math.random() - 0.5) * 0.01;
+    }
+
+    newData[i] = {
+      w: wavelengths[i],
+      a: finalAbs,
+    };
+  }
+
+  data = newData;
+
+  const elementSol = document.getElementById('solvent');
+  if (conc_chromophoref > 0) {
+    concRatio = conc_chromophoref / conc_B0;
+    elementSol.style.background = solColor;
+    elementSol.style.opacity = 0.5 * concRatio * 2;
+  } else {
+    elementSol.style.background = '#abdcf2';
+    elementSol.style.opacity = 0.5;
+  }
+}
+calcThermoVars();
+
+// tab 2 end //
+
+// tab 1 start //
+
+// water bath slider (start)
+let bathTemp_C = 20; // in °C
+let iceTemp_C = Math.round(getRandomAmount(-9, -1)); // in °C
+
+const slider = document.getElementById('tempSlider');
+const bubble = document.getElementById('temp-bubble-bath');
+
+function updateBubble() {
+  const temp = Number(slider.value);
+  bubble.textContent = `${temp}°C`;
+
+  const sliderWidth = slider.offsetWidth;
+  const thumbWidth = 30;
+  const percent =
+    (temp - Number(slider.min)) / (Number(slider.max) - Number(slider.min));
+  const offsetX = percent * (sliderWidth - thumbWidth) + thumbWidth / 2;
+  bubble.style.left = `${offsetX}px`;
+
+  // Update external variable
+  bathTemp_C = temp;
+}
+window.addEventListener('DOMContentLoaded', () => {
+  // slider.value = bathTemp_C;
+  updateBubble();
+});
+
+// cuvette object (start)
+const cube = document.getElementById('cube');
+const tempBubble_cuv = document.getElementById('temp-bubble-cuv');
+tempBubble_cuv.textContent = `${solTemp_C}°C`;
+const container = document.getElementById('cube-container');
+
+const cubeWidth = 26;
+const cubeHeight = 88;
+
+// Define positions (adjust as needed)
+const positions = [
+  { x: 850, y: 450 }, // start
+  { x: 950, y: 584 }, // spec
+  { x: 225, y: 655 }, // ice bath
+  { x: 490, y: 690 }, // water bath
+];
+let nearest = positions[0]; // use nearest["x"] OR nearest.x to find current x position
+let markers = [];
+
+// Dynamically create markers and waves inside container
+positions.forEach((pos) => {
+  const marker = document.createElement('div');
+  marker.classList.add('marker');
+  marker.style.left = pos.x + 'px';
+  marker.style.top = pos.y + 'px';
+
+  for (let i = 0; i < 3; i++) {
+    const wave = document.createElement('div');
+    wave.classList.add('wave');
+    marker.appendChild(wave);
+  }
+
+  container.appendChild(marker);
+  markers.push(marker);
+});
+
+function update_cuvTemp() {
+  if (nearest.x == positions[2].x) {
+    tempBubble_cuv.textContent = `${iceTemp_C}°C`;
+    solTemp_C = iceTemp_C;
+  } else if (nearest.x == positions[3].x) {
+    tempBubble_cuv.textContent = `${bathTemp_C}°C`;
+    solTemp_C = bathTemp_C;
+  }
+  calcThermoVars();
+}
+
+function setCubePosition(pos) {
+  cube.style.left = pos.x - cubeWidth / 2 + 'px';
+  cube.style.top = pos.y - cubeHeight / 2 + 'px';
+  updateBubblePosition();
+  update_cuvTemp();
+}
+
+// Start at first position
+setCubePosition(positions[0]);
+
+let offsetX, offsetY;
+let isDragging = false;
+
+function updateBubblePosition() {
+  const cubeRect = cube.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+  tempBubble_cuv.style.left =
+    cubeRect.left + cubeRect.width / 2 - containerRect.left + 'px';
+  tempBubble_cuv.style.top = cubeRect.top - 35 - containerRect.top + 'px'; // 15px higher than default
+}
+
+cube.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  offsetX = e.clientX - cube.offsetLeft;
+  offsetY = e.clientY - cube.offsetTop;
+
+  // Activate waves
+  markers.forEach((marker) => {
+    marker
+      .querySelectorAll('.wave')
+      .forEach((wave) => wave.classList.add('active'));
+  });
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (isDragging) {
+    cube.style.left = e.clientX - offsetX - container.offsetLeft + 'px';
+    cube.style.top = e.clientY - offsetY - container.offsetTop + 'px';
+    updateBubblePosition();
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  if (isDragging) {
+    isDragging = false;
+
+    // Deactivate waves
+    markers.forEach((marker) => {
+      marker
+        .querySelectorAll('.wave')
+        .forEach((wave) => wave.classList.remove('active'));
+    });
+
+    // Snap to nearest position
+    nearest = positions[0];
+    let minDist = distance(
+      cube.offsetLeft + cubeWidth / 2,
+      cube.offsetTop + cubeHeight / 2,
+      nearest.x,
+      nearest.y,
+    );
+
+    positions.forEach((pos) => {
+      const dist = distance(
+        cube.offsetLeft + cubeWidth / 2,
+        cube.offsetTop + cubeHeight / 2,
+        pos.x,
+        pos.y,
+      );
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = pos;
+      }
+    });
+
+    setCubePosition(nearest);
+    updateCanvas(lambda);
+  }
+});
+
+function distance(x1, y1, x2, y2) {
+  return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+}
+
+// Update temperature dynamically
+tempSlider.addEventListener('input', () => {
+  updateBubble();
+  update_cuvTemp();
+});
+
+// spectrum (start)
+let lambda = 950;
+const canvas = document.getElementById('plotCanvas');
+const ctx = canvas.getContext('2d');
+const margin = { l: 100, r: 50, t: 24, b: 100 };
+let xMin = 380,
+  xMax = 930,
+  yMin = 0,
+  yMax = 1;
+
+function transformX(w) {
+  return (
+    margin.l +
+    ((w - xMin) / (xMax - xMin)) * (canvas.width - margin.l - margin.r)
+  );
+}
+function transformY(a) {
+  return (
+    margin.t +
+    (1 - (a - yMin) / (yMax - yMin)) * (canvas.height - margin.t - margin.b)
+  );
+}
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+function drawAxes() {
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(
+    margin.l,
+    margin.t,
+    canvas.width - margin.l - margin.r,
+    canvas.height - margin.t - margin.b,
+  );
+  ctx.strokeStyle = 'lightgray';
+  ctx.lineWidth = 1;
+  ctx.font = '16px Arial';
+  ctx.fillStyle = '#000';
+
+  // x ticks
+  const xTicks = 5;
+  for (let i = 0; i <= xTicks; i++) {
+    const t = xMin + ((xMax - xMin) * i) / xTicks;
+    const x = transformX(t);
+    ctx.beginPath();
+    ctx.moveTo(x, margin.t);
+    ctx.lineTo(x, canvas.height - margin.b);
+    ctx.stroke();
+    ctx.fillText(Math.round(t) + ' nm', x - 18, canvas.height - margin.b + 32);
+  }
+
+  // y ticks - Update to .toFixed(1) for cleaner dynamic labels
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const a = yMin + ((yMax - yMin) * i) / yTicks;
+    const y = transformY(a);
+    ctx.beginPath();
+    ctx.moveTo(margin.l, y);
+    ctx.lineTo(canvas.width - margin.r, y);
+    ctx.stroke();
+    ctx.fillText(a.toFixed(1), 70, y + 4);
+  }
+
+  ctx.save();
+  ctx.font = '24px Arial';
+  ctx.translate(margin.l / 2, canvas.height / 2 + 20);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('Absorbance', 0, -20);
+  ctx.restore();
+  ctx.font = '24px Arial';
+  ctx.fillText(
+    'Wavelength (nm)',
+    canvas.width / 2 - 40,
+    canvas.height - margin.b + 75,
+  );
+}
+function drawSpectrum(data) {
+  if (nearest.x != positions[1].x) return; // only draw if cuvette is in spec position
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < data.length; i++) {
+    const p = data[i];
+    const x = transformX(p.w);
+    const y = transformY(p.a);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+function drawIndicatorLine(lambda) {
+  const x = transformX(lambda);
+  ctx.strokeStyle = '#cc9900';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(x, margin.t);
+  ctx.lineTo(x, canvas.height - margin.b);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+function render() {
+  // 1. Determine dynamic Y-Max
+  let dataMax = 0;
+  if (data && data.length > 0) {
+    dataMax = Math.max(...data.map((p) => p.a));
+  }
+
+  // Floor at 1.0, Buffer of 10%, Ceiling at 1.6
+  yMax = Math.min(1.6, Math.max(1.0, dataMax * 1.1));
+
+  clearCanvas();
+  drawAxes();
+  drawSpectrum(data);
+}
+
+canvas.addEventListener('click', updateCanvas);
+function updateCanvas(evOrW) {
+  let w;
+
+  if (typeof evOrW === 'number') {
+    // direct wavelength passed in
+    w = evOrW;
+  } else if (evOrW && evOrW.clientX !== undefined) {
+    // Mouse event
+    const ev = evOrW;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const mx = (ev.clientX - rect.left) * scaleX;
+    const W = canvas.width - margin.l - margin.r;
+    const frac = (mx - margin.l) / W;
+    w = xMin + frac * (xMax - xMin);
+  } else {
+    // nothing valid passed: just re-render
+    render();
+    return;
+  }
+
+  // find nearest data point by wavelength
+  const nearest_w = data.reduce((prev, cur) =>
+    Math.abs(cur.w - w) < Math.abs(prev.w - w) ? cur : prev,
+  );
+  selected.lambda = nearest_w.w;
+  lambda = selected.lambda;
+  selected.absorbance = nearest_w.a;
+  document.getElementById('selLambda').textContent = selected.lambda.toFixed(0);
+
+  if (isNaN(selected.absorbance)) {
+    document.getElementById('selAbs').textContent = (0).toFixed(3);
+    render();
+  } else if (nearest.x == positions[1].x) {
+    document.getElementById('selAbs').textContent =
+      selected.absorbance.toFixed(3);
+    render();
+    const x = transformX(selected.lambda),
+      y = transformY(selected.absorbance);
+    ctx.fillStyle = '#cc9900';
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    document.getElementById('selAbs').textContent = (0).toFixed(3);
+    render();
+  }
+  drawIndicatorLine(selected.lambda);
+}
+
+window.getSelectedWavelength = () => selected.lambda;
+window.getSelectedAbsorbance = () => selected.absorbance;
+
+(function init() {
+  xMin = Math.min(...data.map((p) => p.w));
+  xMax = Math.max(...data.map((p) => p.w));
+  yMin = 0;
+  // yMax will be set inside render()
+  render();
+})();
+
+// end tab 2 //
+
+const drawer = document.getElementById('sideDrawer');
+const tab = document.getElementById('drawerTab');
+
+// 1. Define your custom functions
+function onDrawerOpen() {
+  // console.log("Drawer is now open!");
+  resetSyringes();
+  resetCuvette();
+  updateCanvas(lambda);
+}
+
+function onDrawerClose() {
+  // console.log("Drawer is now closed!");
+  calcThermoVars();
+}
+
+// 2. Update the listener to check the state
+tab.addEventListener('click', () => {
+  drawer.classList.toggle('open');
+
+  // 3. Use .contains() to see what happened
+  if (drawer.classList.contains('open')) {
+    tab.innerText = 'Click to Dispense Reagents';
+    onDrawerOpen();
+  } else {
+    tab.innerText = 'Click to View Reagents';
+    onDrawerClose();
+  }
+});
+
+// rest cyvette
+function resetCuvette() {
+  const elementSol = document.getElementById('solvent');
+  elementSol.style.height = 0 + '%';
+  setCubePosition(positions[0]);
+  solTemp_C = 20;
+  tempBubble_cuv.textContent = `${solTemp_C}°C`;
+}
+
+// reset syringes
+function resetSyringes() {
+  vol_A = 0; // in mL
+  vol_B = 0; // in mL
+  vol_solvent = 0; // in mL
+  plunger1.style.bottom = `${27}px`;
+  plunger2.style.bottom = `${27}px`;
+  plunger3.style.bottom = `${27}px`;
+}
+
+// Reset
+resetButton.addEventListener('click', resetAll);
+function resetAll() {
+  resetCuvette();
+  bathTemp_C = 20;
+  slider.value = bathTemp_C;
+  resetSyringes();
+  calcThermoVars();
+  lambda = 0;
+  updateCanvas(lambda); // This triggers render()
+  document.getElementById('selLambda').textContent = '---';
+  document.getElementById('selAbs').textContent = '-.---';
+}
+resetAll();
+
+
+</script>
+</body>
+</html>
